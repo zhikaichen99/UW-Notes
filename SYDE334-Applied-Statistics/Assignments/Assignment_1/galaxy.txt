@@ -1,0 +1,12 @@
+Galaxies	x	y
+Virgo	22	0.75
+Pegasus	68	2.4
+Perseus	108	3.2
+ComaBerenices	137	4.7
+UrsaMajor1	255	9.3
+Leo	315	12
+CoronaBorealis	390	13.4
+Gemini	405	14.4
+Bootes	685	24.5
+UrsaMajor2	700	26
+Hydra	1100	38

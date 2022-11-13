@@ -1,0 +1,62 @@
+---
+title: "SYDE334_A2_Q1"
+author: "Zhi Kai Chen"
+date: "2/10/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+## Question 1
+
+a) Examine the plot of the data. Does a simple linear regression model seem appropriate? Explain
+
+```{r}
+stock_data <- read.delim('stock.txt') 
+x_vals = stock_data$PortfolioRate
+y_vals = stock_data$StockRate
+plot(x_vals, y_vals, xlab = "Rate of Return of Market Portfolio", ylab = "Rate of Return of Stock", main = "Stock")
+
+```
+Yes, a simple linear regression model seems appropriate. There appears to be a general trend where as the rate of return of market porfolio increases, so does the rate of return of stock.
+
+b) Fit the simple linear regression model, provide the equation of the fitted line. What financial implication does the value of the estimate $\beta_1$ have?
+
+```{r}
+# First linear model, with intercept
+fit_1 = lm(StockRate~PortfolioRate, data = stock_data) 
+summary(fit_1)
+```
+The financial implication of $\beta_1$ implies that as the rate of return of the portfolio increases by 1, the rate of return of the stock increases by 0.52397.
+
+c) Produce a 95% confidence interval for $\beta_1$, and use it to assess the significance of $\beta_1$.
+
+$$\alpha = 0.05, \space DF = 38$$
+$$t_{\alpha/2,38} = t_{0.025,38} = 2.021$$
+
+$se(\hat{\beta_1}) = 0.07461$
+$\hat{\sigma}^2 = 2.145$
+
+$$t = \frac{\hat{\beta_1} - \beta_1}{se(\hat{\beta_1})}= \frac{0.52397}{2.145} = 0.244275$$
+95% Confidence Interval:
+
+$$\hat{\beta_1} - t_{0.025,n-2}se(\hat{\beta_1}) < \beta_1 < \hat{\beta_1} + t_{0.025,n-2}se(\hat{\beta_1}) $$
+$$0.52397 - 2.021*2.145 < \beta_1 < 0.52397 + 2.021*2.145 $$
+$$-3.811075 < \beta_1 < 4.859015 $$
+
+d) Test the hypothesis (at a 5% significance level) that is particular stock is an average-risk stock.
+
+e) Predict the return rate for this stock and construct a 95% confidence interval.
+
+```{r}
+newdata = data.frame(PortfolioRate = 8)
+pred = predict.lm(fit_1, newdata, interval = "confidence", level = 0.95)
+pred
+```

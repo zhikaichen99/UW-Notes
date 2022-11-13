@@ -1,0 +1,54 @@
+---
+title: "SYDE334_A3"
+author: "Zhi Kai Chen"
+date: "3/07/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+#### Question One
+
+a) 
+
+
+b)
+$$\sum{y_i} = \sum{\hat{y_i}}$$
+$$y_i = \hat{y_i} + \hat{\epsilon_i}$$
+$$\sum{\hat{\epsilon_i}} = 0$$
+$$\sum{y_i} = \sum{\hat{y_i}} + \cancel{\sum{\hat{\epsilon_i}}}$$
+$$\sum{y_i} = \sum{\hat{y_i}}$$
+c)
+$$\hat{Y}'r = 0$$
+$$r = Y - \hat{Y}$$
+$$X'r = X'Y-X'\hat{Y}$$
+$$X'r = X'Y - X'X\hat{\beta}$$
+$$\hat{\beta} = (X'X)^{-1}X'Y$$
+$$X'r = X'Y - X'X(X'X)^{-1}X'Y = 0$$
+Since Y is a product of X, and since X'r = 0, therefore Y'r = 0.
+
+
+d)
+$$r = \frac{\sum(y_i - \bar{y})(\hat{y} - \bar{\hat{y}})}{\sqrt{\sum(y_i - \bar{y})^2 \sum{(\hat{y} - \bar{\hat{y}})^2}}}$$
+$$(\hat{y} - \bar{\hat{y}}) = (\bar{y} - \hat{\beta}\bar{x} + \hat{\beta}x_i - \bar{y})$$
+$$(\hat{y} - \bar{\hat{y}}) = \hat{\beta}(x_i - \bar{x})$$
+$$\sum(\hat{y} - \bar{\hat{y}})^2 = \hat{\beta}^2\sum(x_i - \bar{x})^2$$
+$$r = \frac{\sum(y_i - \bar{y})(\hat{\beta}(x_i - \bar{x}))}{\sqrt{\sum(y_i - \bar{y})^2 \hat{\beta}^2\sum(x_i - \bar{x})^2}} = \frac{\sum(y_i - \bar{y})(x_i - \bar{x})}{\sqrt{\sum(y_i - \bar{y})^2 \sum(x_i - \bar{x})^2}} = \frac{S_{xy}}{\sqrt{S_{xx}S_{yy}}}$$
+$$SRR = \sum(\hat{y} - \bar{\hat{y}})^2 = \sum\hat{\beta}^2(x_i - \bar{x})^2 \space from \space previous \space calculations$$
+$$SRR = (\frac{S_{xy}}{S_{xx}})^2S_{xx}$$
+$$R^2 = \frac{SRR}{SST}$$
+$$SST = \sum(y- \bar{y})^2 = S_{yy}$$
+$$R^2 = \frac{(\frac{S_{xy}}{S_{xx}})^2S_{xx}}{S_{yy}} = \frac{S_{xy}^2}{S_{xx}S_{yy}}$$
+$$R = \frac{S_{xy}}{\sqrt{S_{xx}S_{yy}}}$$
+
+
+
+
+

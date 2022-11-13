@@ -1,0 +1,43 @@
+---
+title: "SYDE334_A2_Q3"
+author: "Zhi Kai Chen"
+date: "2/10/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+## Question 3
+
+Consider the simnple linear regression model:
+
+$$y_i = \beta_0 + \beta_1x_i + \epsilon_i $$
+a) Re-write this model in vector and matrix form.
+
+$$ y_{nx1} = \begin{bmatrix}  \\ y_1\\ y_2\\ y_3\\. \\. \\. \\y_n \end{bmatrix} \space x_{nx(p+1)} = \begin{bmatrix}  \\ 1 & x_{1}\\ 1 & x_{2} \\ . &. \\.&.\\.&.\\1&x_n \end{bmatrix} \space \beta_{(p+1)x1} = \begin{bmatrix}   \beta_0\\ \beta_1 \end{bmatrix} \space \epsilon_{nx1} = \begin{bmatrix}  \\ \epsilon_1\\ \epsilon_2\\ \epsilon_3\\. \\. \\. \\\epsilon_n \end{bmatrix}$$
+$$y_{nx1} = x_{nx(p+1)}\beta_{(p+1)x1} + \epsilon_{nx1}$$
+b) Using matrix arithmetic to find explicit expressions for the least squares estimators of $\beta_0$ and $\beta_1$ and their variances.
+
+$$\hat{\beta} = (X^TX)^{-1}X^Ty$$
+$$(X^TX)^{-1} = \begin{bmatrix}  \\ 1 & 1 &.&.&.&1\\ x_{1} & x_{2} &.&.&.& x_{n} \end{bmatrix}\begin{bmatrix}  \\ 1 & x_{1}\\ 1 & x_{2} \\ . &. \\.&.\\.&.\\1&x_n \end{bmatrix}$$
+$$(X^TX) = \begin{bmatrix} 1+1+1+1... & x_1 + x_2... \\ x_{1}+x_2+x_3... & x_1^2 + x_2^2 ... \end{bmatrix} = \begin{bmatrix} n & \sum_{i = 1}^{n} x_i \\ \sum_{i = 1}^{n} x_i & \sum_{i = 1}^{n} x_i^2 \end{bmatrix}$$
+$$(X^TX)^{-1} = \frac{1}{X^TX}\begin{bmatrix} \sum_{i = 1}^{n} x_i^2 & -\sum_{i = 1}^{n} x_i \\ -\sum_{i = 1}^{n} x_i & n \end{bmatrix} = \frac{1}{n\sum_{i = 1}^{n} x_i^2- \sum_{i = 1}^{n} x_i^2}\begin{bmatrix} \sum_{i = 1}^{n} x_i^2 & -\sum_{i = 1}^{n} x_i \\ -\sum_{i = 1}^{n} x_i & n \end{bmatrix}$$
+
+$$X^Ty = \begin{bmatrix}  \\ 1 & 1 &.&.&.&1\\ x_{1} & x_{2} &.&.&.& x_{n} \end{bmatrix}\begin{bmatrix}  \\ y_1\\ y_2\\ y_3\\. \\. \\. \\y_n \end{bmatrix}  $$
+$$X^Ty = \begin{bmatrix} y_1 + y_2 + y_3 ... \\ x_{1}y_1 + x_2y_2 + x_3y_3 ... \end{bmatrix} = \begin{bmatrix} \sum_{i=1}^{n} y_i \\ \sum_{i=1}^{n} x_iy_i \end{bmatrix}$$
+$$\hat{\beta} = \frac{1}{n\sum_{i = 1}^{n} x_i^2- \sum_{i = 1}^{n} x_i^2}\begin{bmatrix} \sum_{i = 1}^{n} x_i^2 & -\sum_{i = 1}^{n} x_i \\ -\sum_{i = 1}^{n} x_i & n \end{bmatrix}\begin{bmatrix} \sum_{i=1}^{n} y_i \\ \sum_{i=1}^{n} x_iy_i \end{bmatrix}$$
+$$\hat{\beta} = \frac{1}{n\sum_{i = 1}^{n} x_i^2- \sum_{i = 1}^{n} x_i^2}\begin{bmatrix} \sum_{i = 1}^{n} x_i^2\sum_{i=1}^{n} y_i  -\sum_{i = 1}^{n} x_i\sum_{i=1}^{n} x_iy_i \\ -\sum_{i = 1}^{n} x_i\sum_{i=1}^{n} y_i + n\sum_{i=1}^{n} x_iy_i \end{bmatrix}$$
+$$\overline{x} = \frac{\sum x_i}{n} , \overline{x}n= \sum x$$
+$$\hat{\beta_0} = \frac{\overline{y}\cancel{n}\sum_{i = 1}^{n} x_i^2-\overline{x}\cancel{n}\sum_{i=1}^{n}x_iy_i}{\cancel{n}\sum_{i=1}^{n} x_i^2-\cancel{n}\sum_{i=1}^{n} \overline{x}^2} = \frac{\overline{y}\sum_{i = 1}^{n} x_i^2-\overline{x}\sum_{i=1}^{n}x_iy_i}{\sum_{i=1}^{n} (x_i^2-\overline{x}^2)} $$
+$$\hat{\beta_1} = \frac{-n\overline{x}\cancel{n}\overline{y}+\cancel{n}\sum_{i=1}^{n} x_iy_i}{\cancel{n}\sum_{i=1}^{n} x_i^2-\cancel{n}\sum_{i=1}^{n} \overline{x}^2} = \frac{-n\overline{x}\overline{y} + \sum_{i=1}^{n}x_iy_i}{\sum_{i=1}^{n} (x_i^2-\overline{x}^2)} $$
+$$Var(\hat{\beta}) = \sigma^2 {(X'X)}^{-1}$$
+$$\begin{bmatrix} Var(\hat{\beta_0}) & Cov(\hat{\beta_0},\hat{\beta_1}) \\ Cov(\hat{\beta_0},\hat{\beta_1})  & Var(\hat{\beta_1}) \end{bmatrix} = \frac{\sigma^2}{n\sum_{i = 1}^{n} x_i^2- \sum_{i = 1}^{n} x_i^2}\begin{bmatrix} \sum_{i = 1}^{n} x_i^2 & -\sum_{i = 1}^{n} x_i \\ -\sum_{i = 1}^{n} x_i & n \end{bmatrix}$$
+$$Var(\hat{\beta_0}) = \frac{\sigma^2 \sum_{i=1}^{n}x_i^2}{n\sum_{i=1}^{n} (x_i^2-\overline{x}^2)}$$
+$$Var(\hat{\beta_1}) = \frac{\sigma^2 \cancel{n}}{\cancel{n}\sum_{i=1}^{n} (x_i^2-\overline{x}^2)} = \frac{\sigma^2}{\sum_{i=1}^{n} (x_i^2-\overline{x}^2)}$$

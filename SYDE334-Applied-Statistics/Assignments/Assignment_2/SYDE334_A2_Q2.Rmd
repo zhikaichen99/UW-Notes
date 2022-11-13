@@ -1,0 +1,52 @@
+---
+title: "SYDE334_A2_Q2"
+author: "Zhi Kai Chen"
+date: "2/10/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+## Question 2
+
+An investigative study collected 40 observations from the Wabash river at random locationsnear Lafayette. Each observation consisted of a measure of water pH (x) and fish count (y). The researchers are interested in how the acidity of the water affects the number of fish.
+
+a) Complete the following ANOVA table for the regression analysis (the p-value need not be exact).
+```{r}
+# Create the data frame.
+regression <- data.frame(
+   Source = c("Regression", "Error", "Total"), 
+   SumOfSquares = c("50.30", "60.00 - 53.00 = 9.70" ,"60.00"),
+   DegreeOfFreedom = c("1","40-1-1 = 38","40-1 = 39"), 
+   MeanSquare = c("50.30/1 = 50.30", "9.70/38 = 0.25526315789", ""),
+   Fvalue = c("50.3/0.25526315789 = 197.0517", "", ""),
+   Pvalue = c("0", "","")
+)
+
+regression
+```
+b) Give the form of the linear model, state the null and alternative hypothesis for the F-test as well as your conclusion in sentence form.
+
+$H_0: x = 0$ 
+$H_a: x \neq 0$
+
+The p-value we obtained is 0, with p-value of 0 we must reject the null hypothesis.
+
+c) What is the estimate of the variance of random error?
+
+$$ \hat{\sigma^2} = \frac{SSE}{n -1}  = \frac{9.70}{39} = 0.2487179$$
+d) Use the coefficient of determination to explain what percentage of variation in fish count can be explained by water pH?
+
+$$Coef \space Determination = \frac{SSR}{SST} = \frac{50.30}{60.00} = 0.838332$$
+83% of variation in fish count can be explained by water pH.
+
+
+
+

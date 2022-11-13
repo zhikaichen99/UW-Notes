@@ -1,0 +1,123 @@
+---
+title: "SYDE334 Assignment 1"
+author: "Zhi Kai Chen"
+date: "1/28/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+## Question 3
+
+a) Make a scatter plot of the data. Does there appear to be a linear relationship between
+the two variables?
+
+```{r}
+flow_data <- read.delim('flowrate.txt')
+
+pressure = flow_data$PressureDrop
+flowrate = flow_data$FlowRate
+ 
+plot(pressure, flowrate, xlab = "Pressure Drop (in inches of water)", 
+     ylab = "Flow Rate (in m3/min)", 
+     main = "Flow Rate vs Pressure Drop")
+```
+Yes there appears to be a linear relationship between the two variables
+
+
+b) Fit a simple linear regression model, provide the equation of the fitted line.
+
+```{r}
+# First linear model, with intercept
+fit = lm(flowrate~pressure, data = flow_data)
+summary(fit)
+
+```
+Equation of fitted line:
+
+$$\hat{y_i} = -0.179080 + 0.102342x_i + \epsilon$$
+$$\epsilon \sim N(0,0.08652^2)$$
+
+
+c) Conduct a t test (at a 5% significance level) to determine whether or not there is a
+linear association between the two variables. State the hypothesis, decision rule, and
+conclusion. What is the p-value of your test?
+
+$$ \alpha = 0.05 $$
+
+Hypothesis:
+$$ H_0 : \rho = 0 $$ 
+
+Alternate Hypothesis:
+$$ H_A : \rho \neq 0 $$
+
+t ratio:
+$$ t = \frac{\hat{\beta_1} - 0}{Se(\hat{\beta_1})} = \frac{0.102342}{0.006303} = 16.23703 $$
+$$ |t| = |16.23703| > t_{0.05/2, 25-2} = |16.23703| > 2.069$$
+Reject the null hypothesis. We can conclude that there is strong evidence of a linear relationship between the flow rate and the pressure drop.
+
+d) Test the hypothesis (at a 5% significance level) that the average change in the flow rate
+associated with a 1 inch increase in the pressure drop is 0.10m3/min, and provide a
+conclusion in context.
+
+$$ \alpha = 0.05 $$
+$$ H_0 : \hat{\beta_0} = 0.10 $$ 
+$$ H_0 : \hat{\beta_0} \neq 0.10 $$ 
+$$ t = \frac{\hat{\beta_1} - 0.10}{Se(\hat{\beta_1})} = \frac{0.102342-0.10}{0.006303} = 0.3715691 $$
+$$ |t| = |0.3715691| < t_{0.05/2, 25-2} = |0.3715691| < 2.069$$
+We do not reject the null hypothesis at a 5% level.
+
+e) Test the hypothesis (at a 5% significance level) that, at x = 0, the average flow rate is
+-0.1m3/min, and provide a conclusion in context.
+
+f) Estimate the average flow rate when the pressure drop is 10 inches. Provide a 90%
+confidence interval on the mean flow rate.
+
+$$\hat{y_p} = \hat{\beta_0} + \hat{\beta_1}(10) = -0.179080 + 0.102342(10) = 0.84434$$
+```{r}
+x_bar <- mean(pressure)
+y_bar <- mean(flowrate)
+
+sxx <- sum((pressure - x_bar)^2)
+sxy <- sum((pressure - x_bar)*(flowrate - y_bar))
+
+b1hat <- sxy/sxx
+b0hat <- y_bar-b1hat*x_bar
+
+yhat <- b0hat + b1hat*pressure
+r <- flowrate - yhat
+MSE <- sum(r^2)/(length(pressure)- 2)
+
+#sxx
+sxx
+#MSE
+MSE
+# Mean pressure
+x_bar
+```
+$$ se(\hat{y_p}) = \sqrt{S^2[\frac{1}{n} + \frac{(10 - \overline{x})^2}{S_{xx}}]} = \sqrt{0.007485754^2[\frac{1}{25} + \frac{(10 - 10.628)^2}{188.4504}]}  = 0.001854524557 $$
+A 90% Confidence Interval for the mean at x = 10
+$$\hat{y_p} \pm t_{0.1/2,23}se(\hat{y_p}) =0.84434 \pm (2.069)(0.001854524557) = (0.8405029887, 0.8481770113)$$
+
+g) Provide a 95% prediction interval for the flow rate when the pressure drop was 10 inches.
+
+$$x_p = 10$$
+$$\hat{y_p} = \hat{\beta_0} + \hat{\beta_1}(10) = -0.179080 + 0.102342(10) = 0.84434$$
+$$ Se(y_p - \hat{y_p}) = \sqrt{(1+\frac{1}{n}+ \frac{(x_p-\overline{x})^2}{S_{xx}})S^2} = \sqrt{(1+\frac{1}{25}+ \frac{(10-10.628)^2}{188.4504})0.007485754^2} = 0.07641678$$
+
+
+95% Confidence Interval for $y_p$ is:
+$$y_p \pm t_{0.05/2, 23}(0.07641678) = 0.84434 \pm 2.069(0.07641678) = (0.6862336822,1.002446318) $$
+
+h) A flow rate of 1.1m3/min was recently observed from the measurement device when the
+pressure drop was 10 inches. Using the previous part discuss briefly why you do, or do
+not, believe that the measurement system has changed since the data was collected.
+
+The measurement system has changed since the data was collected. Based off the part g), 1.1m3/min does not fall under the confidence interval therefore it is not a possible value.

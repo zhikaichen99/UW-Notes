@@ -1,0 +1,99 @@
+---
+title: "SYDE334 Assignment 1"
+author: "Zhi Kai Chen"
+date: "1/28/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+## QUESTION 1
+
+a) Find the expression for the least squares estimator (LSE) for $\beta_1$, denote it by $\hat{\beta}$.
+
+$$\frac{\partial }{\partial \beta_1}\sum_{x = i}^{n}[y_i - (\beta_1 x_i)]^2 = \sum_{x = i}^{n}2(y_i - \beta_1 x_i)(-x_i)$$
+$$0 = \sum_{x = i}^{n}2(y_i - \beta_1 x_i)(-x_i)$$
+$$\beta_1 = \frac{\sum_{x = i}^{n}x_iy_i}{\sum_{x = i}^{n}x_i^2}$$
+b) Show that the LSE $\hat{\beta}$ is an unbiased estimator and find its variance, $Var(\hat{\beta})$
+
+Unbiased:
+$$E(\hat{\beta}) = \frac{\sum_{x = i}^{n}x_i E(y_i)}{\sum_{x = i}^{n}x_i^2}$$
+$$E(\hat{\beta}) = \frac{\sum_{x = i}^{n}x_i (\beta_1 x_i)}{\sum_{x = i}^{n}x_i^2}$$
+$$E(\hat{\beta}) = \frac{\sum_{x = i}^{n}\cancel{x_i^2} \beta_1}{\sum_{x = i}^{n}\cancel{x_i^2}} = \hat{\beta}$$
+Variance:
+$$Var(\hat{\beta}) = Var(\frac{\sum_{x = i}^{n}x_i y_i}{\sum_{x = i}^{n}x_i^2})$$
+$$Var(\hat{\beta}) = \frac{\sum_{x = i}^{n}x_i^2 \sigma^2}{(\sum_{x = i}^{n}x_i^2)^2}$$
+$$Var(\hat{\beta}) = \frac{\sigma^2}{\sum_{x = i}^{n}x_i^2}$$
+c) Is it still true that
+i. $\sum_{x = i}^{n} r_i x_i = 0$?
+ii. $\sum_{x = i}^{n} r_i = 0$?
+
+i. 
+$$\sum_{x = i}^{n} r_i x_i = 0$$
+$$\sum_{x = i}^{n} (y_i-\hat{y_i}) x_i = 0$$
+$$\sum_{x = i}^{n} (y_i-\beta_1 x_i) x_i = 0$$
+Yes it is true. We obtained this same expression in part a) when deriving the LSE for $\beta_1$.
+
+ii.
+$$\sum_{x = i}^{n} r_i = 0$$
+$$\sum_{x = i}^{n} y_i - \hat{y_i} = 0 $$
+$$\sum_{x = i}^{n} y_i - \beta_1 x_i = 0 $$
+Can't conclude that this is true. Not the same expression from what was derived in part a) of question.
+
+d) Is it true that $\frac{\sum_{x = i}^{n}(r_i - \overline{r})(x_i - \overline{x})}{\sqrt{\sum_{x = i}^{n}(r_i - \overline{r})^2}\sqrt{\sum_{x = i}^{n}(x_i - \overline{x})^2}} = 0$
+
+Cannot conclude this. From part c) ii. we concluded that $\sum_{x = i}^{n} r_i = 0$ is not necessarily 0.
+
+e) Find the expression for $E(\sum_{x = i}^{n} r_i^2)$ and use it to construct an unbiased estimator for $\sigma^2$.
+
+$$E(\sum_{x = i}^{n} r_i^2) = E(y_i - \hat{y_i})^2$$
+$$ = E[\sum_{x = i}^{n} (y_i - \hat{\beta_1}x_i)^2] $$
+$$ = E[\sum_{x = i}^{n} (y_i^2 - 2\hat{\beta_1}x_i y_i + \hat{\beta_1}^2x_i^2)] $$
+$$ = E[\sum_{x = i}^{n} (y_i^2 - 2x_i y_i \frac{\sum_{x = i}^{n}x_iy_i}{\sum_{x = i}^{n}x_i^2} +x_i^2 (\frac{\sum_{x = i}^{n} x_i y_i}{\sum_{x = i}^{n} x_i^2})^2)] $$
+$$ = E(\sum_{x = i}^{n} y_i^2 - 2\sum_{x = i}^{n}x_i y_i \frac{\sum_{x = i}^{n}x_iy_i}{\sum_{x = i}^{n}x_i^2} + \sum_{x = i}^{n}x_i^2 (\frac{\sum_{x = i}^{n} x_i y_i}{\sum_{x = i}^{n} x_i^2})^2) $$
+$$ = E(\sum_{x = i}^{n} y_i^2 - 2 \frac{(\sum_{x = i}^{n}x_iy_i)^2}{\sum_{x = i}^{n}x_i^2} + \frac{(\sum_{x = i}^{n} x_i y_i)^2}{\sum_{x = i}^{n} x_i^2}) $$
+$$ = E(\sum_{x = i}^{n} y_i^2 -  \frac{(\sum_{x = i}^{n}x_iy_i)^2}{\sum_{x = i}^{n}x_i^2}) $$
+$$ = \sum_{x = i}^{n} E(y_i^2) -  \frac{E(\sum_{x = i}^{n}x_iy_i)^2}{\sum_{x = i}^{n}x_i^2})$$
+$$ E(y_i^2) = \sigma^2 + \beta_1^2 x_i^2 $$
+$$ E(\sum_{x = i}^{n} x_i y_i)^2 = V(\sum_{x = i}^{n} x_i y_i)^2 + E^2(\sum_{x = i}^{n} x_i y_i) = \sum_{x = i}^{n} x_i^2 \sigma^2 + \beta^2(\sum_{x = i}^{n} x_i^2)^2$$
+
+$$E(\sum_{x = i}^{n} r_i^2) = n\sigma^2 + \beta_1^2 \sum_{x = i}^{n}x_i^2 - \frac{\sum_{x = i}^{n} x_i^2 \sigma^2 + \beta^2(\sum_{x = i}^{n} x_i^2)^2}{\sum_{x = i}^{n}x_i^2} $$
+$$E(\sum_{x = i}^{n} r_i^2) = n\sigma^2 + \frac{\cancel{\beta_1^2 (\sum_{x = i}^{n}x_i^2)^2}}{\sum_{x = i}^{n}x_i^2} - \frac{\sum_{x = i}^{n} x_i^2 \sigma^2 + \cancel{\beta^2(\sum_{x = i}^{n} x_i^2)^2}}{\sum_{x = i}^{n}x_i^2} $$
+$$E(\sum_{x = i}^{n} r_i^2) = n\sigma^2 - \frac{\cancel{\sum_{x = i}^{n}} x_i^2 \sigma^2}{\cancel{\sum_{x = i}^{n}x_i^2}} $$
+$$E(\sum_{x = i}^{n} r_i^2) = n\sigma^2 - \sigma^2 = \sigma^2(n-1) $$
+Unbiased Estimator of $\sigma^2$
+
+$$\hat{\sigma} = \frac{1}{n-1} \sum_{x = i}^{n} r_i^2$$
+f) Plot the data. Does the relationship look approximately linear?
+
+```{r}
+galaxy_data <- read.delim('galaxy.txt')
+
+x_vals = galaxy_data$x
+y_vals = galaxy_data$y
+
+plot(x_vals, y_vals, xlab = "x", ylab = "y", main = "Galaxies")
+
+```
+Yes the relationship looks approximately linear
+
+g) Fit two simple linear models, one with intercept and one without intercept.
+
+```{r}
+# First linear model, with intercept
+fit_1 = lm(y~x, data = galaxy_data)
+summary(fit_1)
+
+# Second Linear model, without intercept
+fit_2 = lm(y~0 +x, data = galaxy_data)
+summary(fit_2)
+```
+Removing the intercept does not make much of a difference to the estimate $\beta_1$. The intercept was originally close to 0 anyway hence not much of a difference is observed.
+

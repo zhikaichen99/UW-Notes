@@ -1,0 +1,39 @@
+---
+title: "SYDE334-Assignment-4"
+author: "Zhi Kai Chen"
+date: '2022-03-27'
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+header-includes: \usepackage[makeroom]{cancel}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+library(plotly)
+library(MASS)
+
+```
+
+### Question One
+
+#### a) 
+
+$$\hat{\beta} = (X'X)^{-1}X'y = (X'X)^{-1}X'(X\beta + \epsilon) = \beta + (X'X)^{-1}X'\epsilon$$
+$$E(\hat{\beta}) = E(\beta + (X'X)^{-1}X'\epsilon) = \beta + (X'X)^{-1}X'E(\epsilon)$$
+$$E(\epsilon) = 0$$
+Therefore:
+
+$$\beta + (X'X)^{-1}X'(0) = \beta$$
+$$E(\hat{\beta}) =  \beta$$
+The LSE of $\hat{\beta}$ under the incorrect model is still an unbiased estimator.
+
+#### b)
+
+Yes we still have the result of $E(r) = 0$ under the incorrect model
+
+

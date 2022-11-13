@@ -1,0 +1,45 @@
+---
+title: "SYDE334_A1_Q4"
+author: "Zhi Kai Chen"
+date: "2/10/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+## Question 4
+
+Suppose that the following model is fit:
+
+$$ y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \epsilon_i$$
+a) Write down the equation for the fitted model.
+
+The equation of the fitted line is:
+
+$$ y_i = 52 + 10x_{i1} + 3x_{i2}$$
+
+b) Compute the estimator $\sigma^2$.
+
+$$SSE = 30$$
+$$ \hat{\sigma^2} = \frac{SSE}{n - (p+1)}  = \frac{30}{15 - (2+1)} = 2.5$$
+
+c) Compute the estimated variance of $\hat{\beta_1}$, $\hat{Var(\hat{\beta_1})}$.
+
+$$Var(\hat{\beta}) = \sigma^2 {(X'X)}^{-1}$$
+$$\hat{Var}({\hat{\beta}}) = \hat{\sigma^2}\begin{bmatrix} 2 & -5 & -3 \\ -5 & 1 & -1 \\ -3 & -1 & 5 \end{bmatrix}$$
+$$\hat{Var}({\hat{\beta}}) = \hat{\sigma^2}(1) = 2.5(1) = 2.5$$
+
+d) Test the following hypothesis at a 5% significance level. State the value of the test statistic and draw your conclusion.
+$$ H_0: \beta_1 = 0 \space v.s \space H_a: \beta_1 \neq 0 $$
+$$ t = \frac{\hat{\beta_1} - \beta_{1H_0}}{se(\hat{\beta_1})} = \frac{10 - 0}{\sqrt{\hat{Var}({\hat{\beta}})}} = \frac{10}{1.58113883} = 6.324555321 (value \space of \space test \space statistic)$$
+$$\alpha = 0.05 $$
+$$ |t| > t_{\frac{\alpha}{2},{n-(p+1)}}= 6.324555321 > t_{0.025, 12} = 6.324555321 > 2.179$$
+Reject the null hypothesis. There is enough evidence to claim that $\beta_1$ does not equal to 0.
+

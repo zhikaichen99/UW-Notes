@@ -1,0 +1,67 @@
+---
+title: "SYDE334_A3"
+author: "Zhi Kai Chen"
+date: "3/06/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+(a) Fitting model and providing a fit summary
+```{r}
+insurance_data <- read.table('insurance.txt', sep=",", header = T) 
+fit1 = lm(charges~age+sex+bmi+children+smoker+region, data = insurance_data)
+summary(fit1)
+```
+(b) Comment on overall significance of the model
+
+To test the significance $H_0: \beta_1 = \beta_2 = \beta_3 = \beta_4 = \beta_5 = \beta_6 = 0$. We reject $H_0$ since the F statistics takes a value of 500.8 and the p-value is much smaller than 0.001 (p-value < 2.2e-16). The coefficient of determination is 0.7509 indicating that this is a decent fit.
+
+c) Focus on regional difference
+
+
+i) northeast and northwest
+
+t-test is used to test the hypothesis of the significance of the northwest region (no northeast region coefficient)
+
+$$H_0: \beta_{nw} = 0$$
+$$H_A: \beta_{nw} \neq 0$$ 
+From the p-value output, the value is 0.458769 which is not less than 0.05 therefore this region is not significant.
+
+ii) southeast and southwest
+
+t-test is used to test the hypothesis of the significance of the southeast and southwest region 
+
+for southeast
+$$H_0: \beta_{se} = 0$$
+$$H_A: \beta_{se} \neq 0$$ 
+From the p-value output, the value is 0.030782 which is less than 0.05 therefore the southeast region is significant.
+
+for southwest 
+$$H_0: \beta_{sw} = 0$$
+$$H_A: \beta_{sw} \neq 0$$ 
+From the p-value output, the value is 0.044765 which is less than 0.05 therefore the southwest region is significant.
+
+
+iii) northeast and southeast
+
+iv) northwest and southwest
+
+
+
+d) Is region an important predictor for health insurance cost?
+
+Some regions display signifance therefore some regions are important predictors for health insurance cost.
+
+The Southwest and Southeast regions display p-value of 0.044765 and 0.030782 respectively. Both these values are less than 0.05 therefore these regions are significant.
+
+The northwest region on the other hand has a p-value of 0.458769. This value is greather than 0.06 therefore this region is not significant.
+
+
+

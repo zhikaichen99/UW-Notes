@@ -1,0 +1,63 @@
+---
+title: "SYDE334_A3"
+author: "Zhi Kai Chen"
+date: "3/07/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+#### Question Two
+
+a) Fit Model and provide the fit summary
+```{r}
+tv_advertising <- c(-1, 0,0,1,-1,0,0,1)
+news_advertising <- c(0,-1,1,0,0,-1,1,0)
+ret_incentive <- c("Absent", "Absent", "Absent", "Absent", "Present", "Present", "Present", "Present")
+market_share <- c(1.2, 1.5, 2.2, 2.3, 1.9, 1.4, 2.8, 2.3)
+df <- data.frame(tv_advertising, news_advertising, ret_incentive, market_share)
+
+fit1 = lm(market_share~tv_advertising+news_advertising+ret_incentive, data = df)
+summary(fit1)
+```
+b) Strategies with significant impact
+
+Based on the t-test for $H_0: \beta_j = 0$, effects of tv advertising and new advertising are significant.
+
+c) Tv Advertising vs Newspaper Advertising
+
+$\beta_T$: Change in market share per million dollars spent in Tv advertising
+
+$\beta_N$: Change in market share per million dollars spent in Newspaper advertising
+
+For Tv advertising
+$$1\hat{\beta_T} = 0.3750$$
+$$se(\hat{\beta_T}) = 0.1262$$
+$$95 \space CI: \space 0.3750 ± (t_{0.025,4})(0.1262) = 0.3750 ± (2.776)(0.1262)$$
+$$95 \space CI: (0.024668, 0.7253312)$$
+$$95 \space CI: 3.25*(0.024668, 0.7253312) = (0.080171, 2.3573264)$$
+
+
+For Newspaper advertising
+$$1\hat{\beta_N} = 0.5250$$
+$$se(\hat{\beta_N}) = 0.1262$$
+$$95 \space CI: \space 0.5250 ± (t_{0.025,4})(0.1262) = 0.5250 ± (2.776)(0.1262)$$
+$$95 \space CI: (0.1746688, 0.8703312)$$
+$$95 \space CI: 2.600*(0.1746688, 0.8703312) = (0.4541388, 2.26286112)$$
+
+TV advertising is more cost effectice
+
+
+d) 
+```{r}
+c = data.frame(tv_advertising=0, news_advertising=2, ret_incentive = "Absent")
+pred = predict.lm(fit1, c, interval = 'confidence', level = 0.95)
+pred
+```

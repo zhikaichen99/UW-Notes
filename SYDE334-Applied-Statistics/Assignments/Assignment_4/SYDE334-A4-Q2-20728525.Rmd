@@ -1,0 +1,100 @@
+---
+title: "SYDE3341-Assignment-4"
+author: "Zhi Kai Chen"
+date: '2022-03-27'
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+header-includes: \usepackage[makeroom]{cancel}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+library(plotly)
+library(MASS)
+
+```
+
+### Question Two
+
+```{r}
+hp_data <- read.table("hp.txt", header = TRUE)
+hp_data
+```
+
+#### a) Fitting Regression Model. Residual + QQ Plot
+
+```{r}
+fit = lm(Price~Taxes+Beds+Baths+New+Size, data = hp_data)
+summary(fit)
+```
+```{r}
+par(mfrow = c(1,2))
+
+plot(fit$fitted.values, rstudent(fit), xlab = 'Fitted Values', ylab = 'Studentized Residuals')
+#abline(h=c(2,-2), col = 'red')
+qqnorm(rstudent(fit))
+qqline(rstudent(fit), col = 'blue', lwd = 2)
+```
+The residual vs fitted values chart show that the residuals form the shape of a **fan**. This shows that the variance is not constant. In this plot, the variance increases as y (fitted value) increases.
+
+For the QQ-plot, there is an upward and downward slope at both of the extremes. This indicates that it is heavy-tailed which is problematic and needs to be resolved.
+
+#### b) Box-Cox Transformation and Square-root Transformation
+
+###### Box-Cox Transformation
+```{r}
+bc = boxcox(fit)
+```
+```{r}
+lambda = bc$x[which.max(bc$y)]
+
+fit_box = lm((Price^lambda-1)/lambda~Taxes+Beds+Baths+New+Size, data = hp_data)
+summary(fit_box)
+```
+
+##### Square-Root Transformation
+```{r}
+fit_sqrt = lm(sqrt(Price)~Taxes+Beds+Baths+New+Size, data = hp_data)
+summary(fit_sqrt)
+```
+By look at the summaries for the box-cox fit and the square root fit, we can see that the square-root transformation appears to be the "best" as it has the higher R-Squared value indicating a better fit.
+
+
+#### c) Resgression Analysis Using Square-root transformation
+
+```{r}
+par(mfrow = c(1,2))
+
+plot(fit_sqrt$fitted.values, rstudent(fit_sqrt), xlab = 'Fitted Values', ylab = 'Studentized Residuals')
+abline(h=c(2,-2), col = 'red')
+qqnorm(rstudent(fit_sqrt))
+qqline(rstudent(fit_sqrt), col = 'blue', lwd = 2)
+```
+The Square-Root transformation does resolve the problem from a). The Studentized Residuals vs Fitted Values plot show a horizontal band with most of the values falling between 2 and -2. This indicates that there is no visible defects
+
+For the QQ-plot there is not much of an upward and downward slopes at both of the extremes anymore.
+
+#### d) Backward elimination model selection
+
+```{r}
+fit_sqrt1 = lm(sqrt(Price)~Taxes+Beds+Baths+New+Size, data = hp_data)
+summary(fit_sqrt1)
+```
+```{r}
+fit_sqrt2 = lm(sqrt(Price)~Taxes+Beds+New+Size, data = hp_data)
+summary(fit_sqrt2)
+```
+```{r}
+fit_sqrt3 = lm(sqrt(Price)~Taxes+New+Size, data = hp_data)
+summary(fit_sqrt3)
+```
+###### Form of final fitted model
+
+$$\hat{y_p} = \beta_0 + \hat{\beta_t}x_{ti} + \hat{\beta_n}x_{ni} + \hat{\beta_s}x_{is}  $$
+$$\hat{y_p} = 5.9666966 + 1.4155247x_{ti} + 1.4899452x_{ni} + 0.0019241x_{is}  $$
+

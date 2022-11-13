@@ -1,0 +1,47 @@
+---
+title: "SYDE334 Assignment 1"
+author: "Zhi Kai Chen"
+date: "1/28/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+## QUESTION 2
+
+2. Consider the simple linear regression model $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$
+
+a) Show that $Cov(\hat{\beta_0}, \hat{\beta_1}) = -\overline{x}\sigma^2/S_{xx}$ where $\overline{x} = \sum_{x = i}^{n} x_i/n$ and $S_{xx} = \sum_{x = i}^{n} (x_i - \overline{x})^2$
+
+$$\hat{\beta_1} = \frac{\sum_{x = i}^{n}(x_i - \overline{x})(y_i - \overline{y})}{\sum_{x = i}^{n}(x_i - \overline{x})^2} = \frac{\sum_{x = i}^{n}(x_i - \overline{x}y_i - \cancel{\overline{y}(x_i-\overline{x})})}{\sum_{x = i}^{n}(x_i-\overline{x})^2}$$
+$$\hat{\beta_1} = \frac{\sum_{x = i}^{n}(x_i - \overline{x})y_i}{\sum_{x = i}^{n}(x_i - \overline{x})^2} $$
+$$ \hat{\beta_0} = \overline{y} - \beta_1\overline{x}$$
+$$ \overline{y} = \frac{1}{n}\sum_{x = i}^{n}y_i $$
+$$ \hat{\beta_0} = \frac{1}{n}\sum_{x = i}^{n}y_i  - \frac{\sum_{x = i}^{n}(x_i - \overline{x})y_i}{\sum_{x = i}^{n}(x_i - \overline{x})^2}\overline{x}$$
+$$ \hat{\beta_0} = \sum_{x = i}^{n}[\frac{1}{n}  - \frac{\sum_{x = i}^{n}(x_i - \overline{x})}{\sum_{x = i}^{n}(x_i - \overline{x})^2}\overline{x}]y_i$$
+let $b_i = \frac{\sum_{x = i}^{n}(x_i-\overline{x})}{\sum_{x = i}^{n}(x_i - \overline{x})^2}$ and $a_i = \frac{1}{n} - \overline{x}b_i$
+
+$$Cov(\hat{\beta_0}, \hat{\beta_1}) = Cov(\sum_{x = i}^{n}a_iy_i, \sum_{x = i}^{n}b_iy_i)$$
+$$ = \sigma^2\sum_{x = i}^{n} a_ib_i$$
+$$ = \sigma^2\sum_{x = i}^{n}(\frac{1}{n} - \overline{x}b_i)b_i $$
+$$ = \sigma^2[\frac{1}{n}\sum_{x = i}^{n}b_i - \overline{x}\sum_{x = i}^{n}b_i^2] $$
+$$(x_i - \overline{x}) = 0 $$
+$$ = \sigma^2[\cancel{\frac{1}{n}\sum_{x = i}^{n}\frac{\cancel{\sum_{x = i}^{n}(x_i-\overline{x})}}{\sum_{x = i}^{n}(x_i-\overline{x})^2}} - \overline{x}\sum_{x = i}^{n}\frac{\sum_{x = i}^{n}\cancel{(x_i-\overline{x})^2}}{\sum_{x = i}^{n}((x_i-\overline{x})^2)\cancel{^2}}] $$
+$$ = \sigma^2[-\overline{x}\frac{1}{\sum_{x = i}^{n}(x_i-\overline{x})^2}]$$
+$$Cov(\hat{\beta_0}, \hat{\beta_1}) = \frac{-\sigma^2\overline{x}}{S_{xx}}$$
+
+b) Show that $$Cov(\overline{y}, \hat{\beta}) = 0$$
+
+$$ \overline{y} = \frac{1}{n}\sum_{x = i}^{n}y_i $$
+$$Cov(\overline{y}, \hat{\beta_1}) = Cov(\frac{1}{n}\sum_{x = i}^{n}y_i,\sum_{x = i}^{n}b_iy_i)$$
+$$ = \frac{\sigma^2}{n}\sum_{x = i}^{n} \frac{\sum_{x = i}^{n}(x_i-\overline{x})}{\sum_{x = i}^{n}(x_i - \overline{x})^2}$$
+$$(x_i - \overline{x}) = 0 $$
+$$Cov(\overline{y}, \hat{\beta_1}) = \frac{\sigma^2}{n}\sum_{x = i}^{n} \frac{\sum_{x = i}^{n}0}{\sum_{x = i}^{n}(x_i - \overline{x})^2} = 0$$
+

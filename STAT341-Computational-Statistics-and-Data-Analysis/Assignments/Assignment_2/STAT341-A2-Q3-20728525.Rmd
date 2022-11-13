@@ -1,0 +1,51 @@
+---
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+#### Question Three - 10 Marks
+
+(a) **[5 Marks]** Explain Gradient Descent
+
+Gradient Descent is an iterative numerical method that is used to find either the maximum or minimum of a function. It performs the following steps iteratively:
+
+(1) Calculating the slope (First order derivative) of the function at a current point (this is referred to as the gradient).
+(2) Move in the opposite direction of the slope (if we are looking for the minumum of the function)
+
+Here is an example to help visualize gradient descent:
+
+Let's say you are at the top of a U-shaped hole and you would like to reach the very bottom of the hole. You decide to take steps in the direction of the hole. Based off this decision, you decide to keep going in that direction with the same step until you reach the very bottom of the hole. With each step you take you realize you are going in the right direction as you're getting closer and closer to the bottom (opposite to the direction of the slope). Since you know you are going in the right direction, you keep going and assessing your position. Once you've gotten to the point where you realize after a taking a step, you aren't getting lower into the hole, that is when you you've reached the bottom of the hole. 
+
+The size of the step you are taking is an important parameter in gradient descent referred to as the step size $(\lambda)$. If you take small steps, you'll reach the bottom of the hole, however it will take a long time. If you take large steps, you can potentially reach the bottom of the hole much quicker, however you could potentially skip the bottom of the hole and end up going up the hole on the other side. Therefore it is important to pick an optimal step size the minimizes the time it takes to reach the hole, whilst also minimizing the risk of skipping over the hole.
+
+(b) **[5 Marks]** Batch-Sequential vs Batch-Stochastic vs Gradient Descent. Merits and Drawbacks
+
+**Batch-Sequential**: 
+We start with an intial point $\theta_i$. For Batch-Sequential, all the data is used to update $\theta_i$, however we divide the data into H batches. We perform gradient descent on each batch. Once we've gone through each batch, we take all the gradients and get the average. We use this average gradient to update $\theta_i$. The step size $(\lambda)$ is fixed.
+
+The merits of Batch-Sequential Gradient Descent is that it is more computationally advantageous than traditional gradient descent since it processes a single batch at a time instead of entire data. Stable gradient descent and no noisy error compared to Stochastic.
+
+The drawback of Batch-Sequential Gradient Descent is that convergence is slow. Cannot escape shallow local minima easily because the error gradient is too stable.
+
+
+**Batch-Stochastic**:
+For Batch-Stochastic Gradient Descent, the only difference is that instead of using the entire dataset, for each iteration it generates a random batch and then performs one step of gradient descent using that batch. We start with an initial point $\theta_i$ and this $\theta_i$ value gets updated after each random batch. The step size $(\lambda)$ is fixed.
+
+The primary merit of this is that it is computationally advantageous as it only uses one batch. Additionally, because we are using a random sample each time, the distribution will be different each time. Therefore more space of the function is being explored making it more likely to reach the minimum and avoid local minimas.
+
+However, because it is using a random batch each time, the error is noiser than gradient descent. Additionally, not necessarily a drawback, but it is important to randomize the data.
+
+
+
+
+
+
+
+

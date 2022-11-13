@@ -1,0 +1,33 @@
+---
+title: "STAT341 Assignment 1"
+author: "Zhi Kai Chen"
+date: "1/28/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+## QUESTION 3 [6 marks]
+
+Write a function called `drawBoxPlot` that takes in a single input that is labelled `df`, an $N \times m$ data frame containing *numeric* data. This function should produce a single figure with $m$ boxplots that share a common scale.
+
+- Use the `boxplot.stats` to find the points for the figures. 
+- Use the first 4 columns of the Iris data-set (length and width of sepals and petals) to demonstrate the `drawBoxPlot` function.
+
+```{r}
+drawBoxPlot <- function(df){
+  boxPlot <- boxplot(df)
+  return(boxPlot)
+}
+
+drawBoxPlot(iris[, c(1:4)])
+```
+
+boxplot(faithful)

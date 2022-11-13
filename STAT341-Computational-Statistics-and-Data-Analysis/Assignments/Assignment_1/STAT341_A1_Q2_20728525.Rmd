@@ -1,0 +1,237 @@
+---
+title: "STAT341 Assignment 1"
+author: "Zhi Kai Chen"
+date: "1/28/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+## Question 2
+
+The Iris data set of R. A. Fisher is perhaps the best known database to be found in the pattern recognition literature. The data set includes samples of 4 measurements for each of the 3 species of the iris plant. The file `iris.csv` includes the data and the descriptions of the variables are as follows. Each row in the data-set represents one sample.
+
+Variate        | Description
+-------------- |-----------------------------------------------------
+`SepalLength`        | Sepal length in cm  
+`SepalWidth`        | Sepal width in cm
+`PetalLength`        | Petal length in cm
+`PetalWidth`        | Petal width in cm
+`Species`         | The type of the iris plant
+
+(a) **[1 mark]** Load the data and output the number of rows and columns. 
+
+```{r}
+# Load IRIS dataset
+iris <- read_csv("iris.csv")
+
+# Get number of rows in dataset
+nrow(iris)
+
+# Get number of columns in dataset
+ncol(iris)
+```
+
+(b) **[1 mark]** Using R, calculate the number of each iris species in the data. For presentation quality, consider using the `kable` command.  
+
+```{r}
+# Number of each iris species
+table(iris$Species)
+```
+
+(c) **[2 marks]** Using R, determine which iris species have  the largest and smallest sepal widths, respectively. 
+
+```{r}
+# Largest Sepal Widths
+iris$Species[iris["SepalWidth"] == max(iris["SepalWidth"])]
+
+# Smallest Sepal Widths
+iris$Species[iris["SepalWidth"] == min(iris["SepalWidth"])]
+
+# Confirm using boxplot
+boxplot(SepalWidth~Species, data = iris)
+```
+
+
+(d) **[1 mark]** Using R, calculate and report the average  sepal length for each species of the iris flower. 
+
+```{r}
+# Average sepal length for setosa
+setosa <- iris[iris$Species == "Iris-setosa",]
+mean(setosa$SepalLength)
+
+# Average sepal length for versicolor
+versicolor <- iris[iris$Species == "Iris-versicolor",]
+mean(versicolor$SepalLength)
+
+# Average sepal length for virginica
+virginica <- iris[iris$Species == "Iris-virginica",]
+mean(virginica$SepalLength)
+
+```
+
+(e) Using R, add a new variable to the data called `PetalRatio = PetalWidth/PetalLength` and then determine 
+
+    i) **[2 marks]** the iris species with the lasrgest and the smallest values of `PetalRatio`.
+    
+    ```{r}
+    iris$PetalRatio <- iris$PetalWidth/iris$PetalLength
+    
+    # Species with smallest values of 'Petal Ratio'
+    iris$Species[iris["PetalRatio"] == max(iris["PetalRatio"])]
+    
+    # Species with largest values of 'Petal Ratio'
+    iris$Species[iris["PetalRatio"] == min(iris["PetalRatio"])]
+    
+    # Confirm using box plot
+    boxplot(PetalRatio~Species, data = iris)
+    ```
+
+    ii) **[1 mark]** within each iris species, the proportion of samples with `PedalRatio` $>0.3$. 
+    
+    ```{r}
+    table(iris[iris['PetalRatio'] > 0.3,]$Species)
+    ```
+    
+    
+(f) **[3 marks]** Using R, generate a scatterplot of the sepal length (y-axis) vs. the petal length (x-axis) while colouring the points based on the iris species (use three visible colours, e.g. black, red, and green). Make sure to add a legend and axis labels. Comment on the patterns you observe. 
+
+```{r}
+colors <- c("red", "blue", "green")
+
+plot(SepalLength ~ PetalLength, data = iris, col = colors[factor(iris$Species)], pch = 19, main = "Petal Length vs Sepal Length")
+
+legend("topleft", legend = levels(factor(iris$Species)),
+       col = colors, pch = 19)
+```
+The different species are formed into identifiable clusters. Additionally as the petalLength increases, so does the SepalLength. Setosa has the smallest PetalLength and SepalLength. Virginica has the largest PetalLength and SepalLength
+
+(g) **[3 marks]** Using R, create a figure with 3 panels ($1\times 3$ plots). In each panel, generate the scatterplot of the petal length (y-axis) vs. the petal width (x-axis) of one species of iris. The title of each plot should be the iris species of that plot. Add to each plot a red point indicating the mean of the data in that plot. In particular, the x-coordinate and y-coordinate of the red dot should be, respectively, the mean petal width and the mean petal length of the particular iris species in that panel. Comment on any trends you observe in this plot.
+
+```{r}
+# 3 figures arranged in 1 row and 3 columns
+par(mfcol = c(1,3))
+# Scatterplot for Setosa
+plot(PetalLength ~ PetalWidth, data = setosa, pch = 19, main = "Setosa")
+# Mean data point for Setosa
+points(mean(setosa$PetalWidth), mean(setosa$PetalLength), col = "red", pch = 19)
+# Scatterplot for Versicolor
+plot(PetalLength ~ PetalWidth, data = versicolor, pch = 19, main = "Versicolor")
+# Mean data point for Versicolor
+points(mean(versicolor$PetalWidth), mean(versicolor$PetalLength), col = "red", pch = 19)
+# Scatterplot for Virginica
+plot(PetalLength ~ PetalWidth, data = virginica, pch = 19, main = "Virginica")
+# Mean data point for Virginica
+points(mean(virginica$PetalWidth), mean(virginica$PetalLength), col = "red", pch = 19)
+
+```
+For all the red points for each scatterplot, they are plotted with the largest cluster of datapoints
+
+(h) **[3 marks]** Using R, generate a scatterplot of sepal length (y-axis) vs iris species (x-axis). Add to this plot three red dots indicating the median sepal length of each iris species. Connect the medians (red dots) with red lines.
+
+
+```{r}
+plot(SepalLength~unclass(as.factor(iris$Species)), data = iris, pch = 19, 
+     main = "Sepal Length vs Species", xlab = "Species", 
+     ylab = "SepalLength", xaxt = "n")
+
+medians = c(median(setosa$SepalLength), median(versicolor$SepalLength), median(virginica$SepalLength))
+
+median_species = c(1,2,3)
+
+points(median_species,medians, col = "red", pch = 19)
+segments(x0 = c(1,2), y0 = c(median(setosa$SepalLength),
+                             median(versicolor$SepalLength)), x1 = c(2,3), 
+         y1 = c(median(versicolor$SepalLength),median(virginica$SepalLength)),
+         col = "red", lwd = 2, lty = "dotted")
+
+
+axis(1, at = c(1,2,3), labels = c("Setosa", "Versicolor", "Virginica"))
+
+
+
+
+
+```
+
+(i) Use power transformations for the following figures and plots. Make sure to appropriately title and label your plots.
+
+Here is the `powerfun`  for convenience 
+
+```{r}
+powerfun <- function(x, alpha) {
+  if(sum(x <= 0) > 1) stop("x must be positive")
+  if (alpha == 0)
+    log(x)
+  else if (alpha > 0) {
+    x^alpha
+  } else -x^alpha
+}
+```
+
+  - i) **[2 marks]** Using the `SepalLength` and `PetalRatio`, construct a $1\times 3$ figure containing the two individual histograms and the scatterplot of the two variables. 
+  
+```{r}
+# 3 figures arranged in 1 row and 3 columns
+par(mfcol = c(1,3))
+# Histogram for Sepal Length
+hist(iris$SepalLength, xlab = "Sepal Length", main = "Sepal Length Histogram")
+# Histogram for Petal Ratio
+hist(iris$PetalRatio, xlab = "Petal Ratio", main = "Petal Ratio Histogram")
+
+# Scatter plot of sepal Length vs Petal Ratio
+plot(SepalLength ~ PetalRatio, data = iris, pch = 19, main = "PetalRatio vs SepalLength")
+
+```
+
+  - ii) **[2 marks]** What power (the values of $\alpha$) makes the distribution of `SepalLength` approximately symmetric? Plot a histogram of the transformed variable.  
+  
+```{r}
+alpha_vals <- seq(1,2,length = 10)
+
+# for (i in alpha_vals){
+#   hist(powerfun(iris$SepalLength,i), xlab = "Sepal Length", main = paste(c("Sepal Length Histogram alpha = ", i), collapse = ""))
+# }
+
+hist(powerfun(iris$SepalLength, 1.2222), xlab = "Sepal Length", main = "Sepal Length Histogram alpha = 1.2222")
+
+
+```
+
+  - iii) **[2 marks]** What power (the values of $\alpha$) makes the distribution of `PetalRatio` approximately symmetric? Plot a histogram of the transformed variable. 
+
+```{r}
+alpha_vals <- seq(1,2,length = 10)
+
+# for (i in alpha_vals){
+#   hist(powerfun(iris$PetalRatio,i), xlab = "Petal Ratio", main = paste(c("Petal Ratio Histogram alpha = ", i), collapse = ""))
+# }
+
+hist(powerfun(iris$PetalRatio, 1.4444), xlab = "Petal Ratio", main = "Petal Ratio Histogram alpha = 1.4444")
+
+
+```
+
+  - iv) **[2 marks]** What pair of powers (the values of $\alpha$) makes the scatter plot of `SepalLength` and `PetalRatio` approximately linear? Plot a scatter plot of the transformed variables.  
+  
+```{r}
+alpha_vals <- seq(1,2,length = 2)
+
+for (i in alpha_vals){
+  for (j in alpha_vals){
+      plot(SepalLength ~ PetalRatio, data = iris, pch = 19, 
+           main = paste(c("Petal Ratio Histogram alpha = ", i, ",", j), collapse = ""))
+  }
+
+}
+
+# Scatter plot of sepal Length vs Petal Ratio
+# plot(SepalLength ~ PetalRatio, data = iris, pch = 19, main = "PetalRatio vs SepalLength")
+```

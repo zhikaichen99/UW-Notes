@@ -1,0 +1,88 @@
+---
+title: "STAT341-Assignment3"
+author: "Zhi Kai Chen"
+date: '2022-03-20'
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage[makeroom]{cancel}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+library(plotly)
+
+```
+#### Question Two - 20 Marks
+
+a)
+
+```{r}
+infect_data <- read_csv("infectious.csv")
+```
+
+```{r}
+
+sample_infect <- sample(infect_data, 486, replace = T)
+
+y <- infect_data$Deceased.Prop
+
+inclusionProbFn <- function(N, n){
+  function(u) {
+    n/N
+  }
+}
+
+jointInclusionProbFn <- function(N, n){
+
+  function(u,v){
+    if (u==v){
+      n/N
+    }else{
+      (n*(n-1))/(N*(N-1))
+    }
+  }
+}
+
+HTEstimator <- function(pi_u_fn){
+  function(pop_sample, variable){
+    Reduce('+', Map(function(u){variable(u)/pi_u_fn(u)}, pop_sample), init =0)
+  }
+}
+
+HTVarianceEstimator <- function(population, pi_u_fn, pi_uv_fn){
+  function(pop_sample, variable){
+    Reduce('+', Map(function(u){
+      pi_u <- pi_u_fn(u)
+      y_u <- variable(u)
+      Reduce('+', Map(function(v){
+        pi_v <- pi_u_fun(v)
+        pi_uv <- pi_uv_fn(u,v)
+        y_v <- variable(v)
+        delta_uv <- pi_uv - pi_u*pi_v
+        q_uv <- (delta_uv/pi_uv)*(y_u/pi_u)*(y_v/pi_v)
+      }, pop_sample), init=0)
+    }, pop_sample), init =0)
+  }
+}
+
+
+n = 486
+N = length(infect_data$Deceased.Prop)
+
+inclusionProb <- inclusionProbFn(1:N, n)
+inclusionJointProb <- jointInclusionProbFn(1:N, n)
+
+infectHTEstimator <- HTEstimator(inclusionProb)
+HTVarianceEstimator <- HTVarianceEstimator(1:N, inclusionProb, inclusionJointProb)
+
+
+
+
+
+```
+
+

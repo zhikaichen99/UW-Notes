@@ -1,0 +1,342 @@
+---
+title: "STAT341-Assignment-4"
+author: "Zhi Kai Chen"
+date: '2022-03-26'
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+header-includes: \usepackage[makeroom]{cancel}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+library(plotly)
+
+```
+#### Question Two - 25 Marks
+
+a) **[5 marks]** Generate six scatter plots  of the data in a $3\times2$ grid, where the plots are data as well as polynomials of degrees 1, 2, 5, 10, 15, and 20, respectively overlaid. Use the `getmuhat` function defined in the lectures to estimate these polynomial predictor functions. Use a different colour for each of the different degrees, and use a legend to indicate which degree polynomial is visualized in each plot.
+
+$\;$ 
+
+```{r}
+ozone_data <- read_csv("OzoneData1.csv")
+```
+```{r}
+getmuhat <- function(sampleXY, complexity = 1) {
+  formula <- paste0("y ~ ", 
+                    if (complexity==0) {
+                      "1"
+                      } else
+                        paste0("poly(x, ", complexity, ", raw = FALSE)")
+                        #paste0("bs(x, ", complexity, ")")
+  )
+  
+  fit <- lm(as.formula(formula), data = sampleXY)
+  tx = sampleXY$x
+  ty = fit$fitted.values
+  
+  range.X = range(tx)
+  val.rY = c( mean(ty[tx == range.X[1]]), 
+              mean(ty[tx == range.X[2]]) )
+  
+  ## From this we construct the predictor function
+  muhat <- function(x){
+    if ("x" %in% names(x)) {
+      ## x is a dataframe containing the variate named
+      ## by xvarname
+      newdata <- x
+    } else
+      ## x is a vector of values that needs to be a data.frame
+    { newdata <- data.frame(x = x) }
+    ## The prediction
+    ##
+    val = predict(fit, newdata = newdata)
+    val[newdata$x < range.X[1]] = val.rY[1]
+    val[newdata$x > range.X[2]] = val.rY[2]
+    val
+  }
+  ## muhat is the function that we need to calculate values
+  ## at any x, so we return this function from getmuhat
+  muhat
+}
+
+n = 550
+x <- 1:550
+y <- ozone_data$Ozone
+
+ozone_data_sample <- data.frame(x,y)
+
+
+
+muhat_1 <- getmuhat(ozone_data_sample, 1)
+muhat_2 <- getmuhat(ozone_data_sample, 2) 
+muhat_5 <- getmuhat(ozone_data_sample, 5)
+muhat_10 <- getmuhat(ozone_data_sample, 10)
+muhat_15 <- getmuhat(ozone_data_sample, 15)
+muhat_20 <- getmuhat(ozone_data_sample, 20)
+
+xlim <- extendrange(ozone_data_sample[x,])
+
+
+par(mfrow=c(3,2), mar=c(2,2,2,2))
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+curve(muhat_1, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = "red", lwd=2, main = "Degree = 1")
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+curve(muhat_2, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = "blue", lwd=2, main = "Degree = 2")
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+curve(muhat_5, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = "green", lwd=2, main = "Degree = 5")
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+curve(muhat_10, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = "orange", lwd=2, main = "Degree = 10")
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+curve(muhat_15, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = "purple", lwd=2, main = "Degree = 15")
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+curve(muhat_20, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = "pink", lwd=2, main = "Degree = 20")
+
+
+par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(5, 0, 0, 0), new = TRUE)
+   plot(0, 0, type = 'l', bty = 'n', xaxt = 'n', yaxt = 'n')
+
+legend(x = "top",
+       legend = c("1", "2", "5", "10", "15", "20"),
+       lty = c(1,1,1,1,1,1),
+       col = c("red", "blue", "green", "orange", "purple", "pink"),
+       xpd = TRUE,
+       lwd = 5,
+       horiz = TRUE,
+       cex = 1,
+       seg.len = 1,
+       bty = 'n')
+
+```
+b) **[6 Marks]** generate $M=50$ samples $\mathcal{S}_1,\mathcal{S}_2,\ldots,\mathcal{S}_{50}$ of size $n=100$. You are encouraged (but don't have to) use functions `getSampleComp` and `getXYSample` from the lectures. Fit polynomials of degree 1, 2, 5, 10, 15, and 20 to every sample. Now, create another $3\times2$ grid of plots like in part (a)
+
+```{r}
+getSampleComp <- function(pop, size, replace=FALSE) {
+  N <- popSize(pop)
+  samp <- rep(FALSE, N)
+  samp[sample(1:N, size, replace = replace)] <- TRUE
+  samp
+}
+
+getXYSample <- function(xvarname, yvarname, samp, pop) {
+  sampData <- pop[samp, c(xvarname, yvarname)]
+  names(sampData) <- c("x", "y")
+  sampData
+}
+
+
+popSize <- function(pop) {nrow(as.data.frame(pop))}
+sampSize <- function(samp) {popSize(samp)}
+
+N_S <- 50
+set.seed(341)
+n = 100
+
+
+
+samps <- lapply(1:N_S, FUN= function(i){getSampleComp(ozone_data_sample, n)})
+Ssamples <- lapply(samps, 
+                   FUN= function(Si){getXYSample("x", "y", Si, ozone_data_sample)})
+Tsamples <- lapply(samps,
+                   FUN= function(Si){getXYSample("x", "y", !Si, ozone_data_sample)})
+
+muhats_1 <- lapply(Ssamples, getmuhat, complexity = 1)
+muhats_2 <- lapply(Ssamples, getmuhat, complexity = 2)
+muhats_5 <- lapply(Ssamples, getmuhat, complexity = 5)
+muhats_10 <- lapply(Ssamples, getmuhat, complexity = 10)
+muhats_15 <- lapply(Ssamples, getmuhat, complexity = 15)
+muhats_20 <- lapply(Ssamples, getmuhat, complexity = 20)
+
+
+
+xlim <- extendrange(ozone_data_sample[x,])
+
+
+par(mfrow=c(3,2), mar=c(2,2,2,2))
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+
+for (i in 1:N_S){
+  curveFn <- muhats_1[[i]]
+  curve(curveFn, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = adjustcolor("red", 0.2), lwd=2, lty = (1), main = "Degree = 1")
+}
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+
+for (i in 1:N_S){
+  curveFn <- muhats_2[[i]]
+  curve(curveFn, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = adjustcolor("blue", 0.2), lwd=2, lty = (1), main = "Degree = 2")
+}
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+
+for (i in 1:N_S){
+  curveFn <- muhats_5[[i]]
+  curve(curveFn, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = adjustcolor("green", 0.2), lwd=2, lty = (1), main = "Degree = 5")
+}
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+
+for (i in 1:N_S){
+  curveFn <- muhats_10[[i]]
+  curve(curveFn, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = adjustcolor("orange", 0.2), lwd=2, lty = (1), main = "Degree = 10")
+}
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+
+for (i in 1:N_S){
+  curveFn <- muhats_15[[i]]
+  curve(curveFn, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = adjustcolor("purple", 0.2), lwd=2, lty = (1), main = "Degree = 15")
+}
+
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+
+for (i in 1:N_S){
+  curveFn <- muhats_20[[i]]
+  curve(curveFn, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = adjustcolor("pink", 0.2), lwd=2, lty = (1), main = "Degree = 20")
+}
+
+
+par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(5, 0, 0, 0), new = TRUE)
+   plot(0, 0, type = 'l', bty = 'n', xaxt = 'n', yaxt = 'n')
+
+legend(x = "top",
+       legend = c("1", "2", "5", "10", "15", "20"),
+       lty = c(1,1,1,1,1,1),
+       col = c("red", "blue", "green", "orange", "purple", "pink"),
+       xpd = TRUE,
+       lwd = 5,
+       horiz = TRUE,
+       cex = 1,
+       seg.len = 1,
+       bty = 'n')
+
+```
+(c) **[6 points]** Using the $M=50$ samples of size $n=100$ generated in part (b), calculate the APSE (and each of its components) for degrees `0:15`. In particular, print out a table that shows for each degree `apse`, `var_mutilde`, `bias2` and `var_y`.
+
+```{r}
+getmubar <- function(muhats) {
+  function(x) {
+    Ans <- sapply(muhats, FUN=function(muhat){muhat(x)})
+    apply(Ans, MARGIN=1, FUN=mean)
+  }
+}
+
+getmuFun <- function(pop, xvarname, yvarname){
+  pop = na.omit(pop[, c(xvarname, yvarname)])
+
+    # rule = 2 means return the nearest y-value when extrapolating, same as above.
+  # ties = mean means that repeated x-values have their y-values averaged, as above.
+  tauFun = approxfun(pop[,xvarname], pop[,yvarname], rule = 2, ties = mean)
+  return(tauFun)
+}
+
+
+
+apse_all <- function(Ssamples, Tsamples, complexity, tau){
+  ## average over the samples S
+  ##
+  N_S <- length(Ssamples)
+  muhats <- lapply(Ssamples, 
+                   FUN=function(sample) getmuhat(sample, complexity)
+)
+## get the average of these, mubar
+mubar <- getmubar(muhats)
+
+rowMeans(sapply(1:N_S, 
+                FUN=function(j){
+                  T_j <- Tsamples[[j]]
+                  S_j <- Ssamples[[j]]
+                  muhat <- muhats[[j]]
+                  ## Take care of any NAs
+                  T_j <- na.omit(T_j)
+                  y <- c(S_j$y, T_j$y)
+                  x <- c(S_j$x, T_j$x)
+                  
+                  tau_x <- tau(x)
+                  muhat_x <- muhat(x)
+                  mubar_x <- mubar(x)
+                  
+                  apse <- (y - muhat_x)
+                  bias2 <- (mubar_x - tau_x)
+                  var_mutilde <- (muhat_x - mubar_x)
+                  var_y <- (y - tau_x)
+                  
+                  squares <- rbind(apse, var_mutilde, bias2, var_y)^2
+                  
+                  ## return means
+                  rowMeans(squares)
+                }
+  ))
+}
+
+
+
+muhat = getmuFun(ozone_data_sample, "x", 'y')
+
+
+degrees <- 0:15
+
+apse_vals <- sapply(degrees, 
+                    FUN = function(degree){ 
+                      apse_all(Ssamples, Tsamples, 
+                               complexity = degree, tau = muhat)
+                    }
+)
+
+# Print out the results
+t(rbind(degrees, apse=round(apse_vals,5)))
+
+```
+(d) **[5 points]** Using your results from part (c) construct a plot whose x-axis is degree and which has four lines: one for `apse`, one for `var_mutilde`, one for `bias2` and one for `var_y`. Specifically, and for interpretability, plot `sqrt(apse)`, `sqrt(var_mutilde)`, `sqrt(bias2)` and `sqrt(var_y)` vs. `degree`. Be sure to distinguish the lines with different colours and a legend. Briefly describe the trends you see in the plot.
+
+```{r}
+degree = 0:15
+plot(degrees[degree], sqrt(apse_vals[1,degree]),
+     xlab = "Degree", type = 'l', ylab = 'Attribute Value', col = 'red', lwd = 3, xlim = c(0,15), ylim = c(0,15))
+lines(degrees[degree], sqrt(apse_vals[2,degree]), col = 'blue', lwd = 3)
+lines(degrees[degree], sqrt(apse_vals[3,degree]), col = 'green', lwd = 3)
+lines(degrees[degree], sqrt(apse_vals[4,degree]), col = 'orange', lwd = 3)
+
+```
+\bigskip
+
+Looking at the graph, we can see that they are generally flat except for the tail ends of the graph. For lower degrees (0-2), underfitting occurs. For higher degrees (10-15) overfitting occurs.
+
+
+(e) **[3 points]** Based on your findings in parts (c) and (d), which degree polynomial has the best predictive accuracy? Construct a scatter plot -- like the ones from (a) and (b) -- but this time create just one plot, and overlay just the polynomial predictor function with the degree you identified as best.  
+
+Based off the results from c) and d), it would appear that polynomial with degree 9 has the best predictive accuracy because it has the lowest apse.
+
+```{r}
+plot(ozone_data_sample, pch=19, col = adjustcolor("black", 0.5), xlab="Day", ylab="Ozone")
+muhat_9 <- getmuhat(ozone_data_sample, 9)
+xlim <- extendrange(ozone_data_sample[x,])
+
+
+curve(muhat_9, from = xlim[1], to = xlim[2], add = TRUE, 
+      col = "blue", lwd=2, main = "Degree = 9")
+```

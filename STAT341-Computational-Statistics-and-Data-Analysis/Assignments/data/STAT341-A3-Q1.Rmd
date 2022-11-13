@@ -1,0 +1,188 @@
+---
+title: "STAT341-Assignment3"
+author: "Zhi Kai Chen"
+date: '2022-03-19'
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage[makeroom]{cancel}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+library(plotly)
+
+```
+#### Question One - 24 Marks
+
+a) 
+```{r}
+infect_data <- read_csv("infectious.csv")
+plot(infect_data$Infected, infect_data$Deceased.Prop, main = "Infected vs Deceased",
+     xlab = "Infected", ylab = "Deceased")
+```
+
+
+As the number of people infected increases, the proportion of deceased due to the infectious disease in each community increases.
+
+
+b)
+```{r}
+rho <- function(x,y){
+  alpha <- theta[1]
+  beta <- theta[2]
+  
+  y <- infect_data$Deceased.Prop
+  x <- infect_data$Infected
+  xbar <- mean(x)
+  sum((y-(1-(1/(alpha + beta*x))))^2)
+}
+
+gradient <- function(theta){
+  alpha <- theta[1]
+  beta <- theta[2]
+  
+  y <- infect_data$Deceased.Prop
+  x <- infect_data$Infected
+  
+  N <- length(x)
+  g <- -2*c(sum((1/(alpha+beta*x)^2)*(y-1+1/(alpha+beta*x))), sum((beta/(alpha+beta*x)^2)*(y-1+1/(alpha+beta*x))))
+  g
+}
+
+# gradient <- gradient(theta = c(1,1))
+
+alpha_vals <- seq(0.5, 4, length.out=100)
+beta_vals <- seq(0.1, 2, length.out=100)
+
+
+alpha_plot_vals <- list()
+beta_plot_vals <- list()
+
+for (alpha in alpha_vals){
+  for (beta in beta_vals){
+    g <- gradient(theta = c(alpha,beta))
+    alpha_plot_vals <- append(alpha_plot_vals, g[1])
+    beta_plot_vals <- append(beta_plot_vals, g[2])
+  }
+}
+
+fig <- plot_ly(x = alpha_plot_vals, y = beta_plot_vals, z = volcano, type = "contour")
+
+fig
+
+```
+
+
+c)
+```{r}
+alpha_vals <- seq(1, 3, length.out=100)
+beta_vals <- seq(0.5, 1.5, length.out=100)
+
+
+alpha_plot_vals <- list()
+beta_plot_vals <- list()
+
+for (alpha in alpha_vals){
+  for (beta in beta_vals){
+    g <- gradient(theta = c(alpha,beta))
+    alpha_plot_vals <- append(alpha_plot_vals, g[1])
+    beta_plot_vals <- append(beta_plot_vals, g[2])
+  }
+}
+
+fig <- plot_ly(x = alpha_plot_vals, y = beta_plot_vals, z = volcano, type = "contour")
+
+fig
+
+```
+
+
+
+d) Calculating the Gradient Function and use Newton-Raphson Method
+
+```{r}
+gradient <- function(theta = c(0,0)){
+  alpha <- theta[1]
+  beta <- theta[2]
+  
+  y <- infect_data$Deceased.Prop
+  x <- infect_data$Infected
+  
+  g <- -2*c(sum((1/(alpha+beta*x)^2)*(y-1+1/(alpha+beta*x))), sum((beta/(alpha+beta*x)^2)*(y-1+1/(alpha+beta*x))))
+  g
+}
+
+
+psiPrime <- function(theta = c(0,0)){
+  alpha <- theta[1]
+  beta <- theta[2]
+  
+  y <- infect_data$Deceased.Prop
+  x <- infect_data$Infected
+
+  
+  val = matrix(0, nrow = length(theta), ncol = length(theta))
+  val[1,1] = sum(-2*(-2*y*alpha-2*beta*y*x+2*alpha+2*beta*x-3)*(1/(alpha+beta*x)^4))
+  val[1,2] = sum(-2*x*(-2*y*alpha-2*beta*y*x+2*beta*x+2*alpha-3)*(1/(alpha+beta*x)^4))
+  val[2,1] = sum(-2*beta*(-2*y*alpha-2*beta*x+2*alpha+2*beta*x-3)*(1/(alpha+beta*x)^4))
+  val[2,2] = sum(-2*(beta^2*x^2-beta^2*y*x^2-2*beta*x+y*alpha^2-alpha^2+alpha)*(1/(alpha+beta*x)^4))
+  return(val)
+}
+
+
+NewtonRaphson <- function(theta, psiFn, psiPrimeFn, maxIterations = 200){
+  i <- 0
+  while(i <= maxIterations){
+    thetaNew <- theta - solve(psiPrimeFn(theta), psiFn(theta))
+    theta <- thetaNew
+    i <- i + 1
+  }
+  theta
+}
+
+# i) Using initial Values (2,3)
+NewtonResult_i <- NewtonRaphson(theta = c(2,3), psiFn = gradient, psiPrimeFn = psiPrime)
+
+# ii) Using intial Values (3, 0.2)
+NewtonResult_ii <- NewtonRaphson(theta = c(3,0.2), psiFn = gradient, psiPrimeFn = psiPrime)
+
+# iii) Using initial Values (1, 0.2)
+NewtonResult_iii <- NewtonRaphson(theta = c(1,0.2), psiFn = gradient, psiPrimeFn = psiPrime)
+
+print(list(NewtonResult_i,NewtonResult_ii,NewtonResult_iii))
+
+```
+
+
+
+e) 
+```{r}
+x <- infect_data$Infected
+y <- infect_data$Deceased.Prop
+
+y_hat_i <- 1-1/(NewtonResult_i[1]+NewtonResult_i[2]*x)
+y_hat_ii <- 1-1/(NewtonResult_ii[1]+NewtonResult_ii[2]*x)
+y_hat_iii <- 1-1/(NewtonResult_iii[1]+NewtonResult_iii[2]*x)
+
+plot(x,y, xlim=c(0,50), ylim=c(0.4, 1.2))
+points(x, y_hat_i, col = 'blue')
+points(x, y_hat_ii, col = 'green')
+points(x, y_hat_iii, col = 'red')
+
+```
+
+
+
+f) Transform the data
+```{r}
+fit = lm((Deceased.Prop)~Infected, data = infect_data)
+summary(fit)
+```
+```{r}
+plot(x,y)
+abline(fit)
+```

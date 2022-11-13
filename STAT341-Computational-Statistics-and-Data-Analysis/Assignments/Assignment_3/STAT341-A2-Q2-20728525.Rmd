@@ -1,0 +1,101 @@
+---
+title: "STAT341_A2"
+author: "Zhi Kai Chen"
+date: "2/18/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+
+```{r}
+econ_mob_data <- read_csv("EconomicMobility.csv")
+```
+
+#### Question Two - 25 Marks 
+
+a) **[2 marks]** Derive the log-likelihood function of the parameter vector $\boldsymbol\theta=(\alpha,\beta)$. 
+
+$$
+f(y) = \frac{\beta^\alpha y^{\alpha-1}}{\Gamma(\alpha)}\exp(-y\beta)
+$$
+Likelihood function:
+$$L(\theta) = L(\theta;y) = \prod_{i=1}^{n}f(y_i;\theta)$$
+Log-Likelihood function:
+$$l(\theta) = lnL(\theta) = logL(\theta)$$
+$$L(\alpha, \beta) = \prod_{i=1}^{n} \frac{\beta^{\alpha}y_i^{\alpha-1}}{\gamma(\alpha)}e^{-y_i\beta}$$
+$$l(\alpha, \beta) = ln(\prod_{i=1}^{n}\frac{\beta^{\alpha}y_i^{\alpha-1}e^{-y_i \beta}}{\gamma(\alpha)}) = ln(\frac{\beta^{n\alpha}(\prod_{i=1}^{n}(y_i))^{\alpha-1}e^{-\beta \sum y_i}}{[\gamma(\alpha)]^n})$$
+$$l(\alpha, \beta) = n\alpha ln(\beta) + (\alpha - 1)ln(\prod_{i=1}^{n}y_i)-\beta \sum_{i=1}^{n} y_i - ln(\gamma(\alpha)^n)$$
+Log-Likelihood function of Gamma Distribution Function:
+$$l(\alpha, \beta) = n\alpha ln(\beta) + (\alpha - 1)\sum_{i=1}^{n}ln(y_i) - \beta \sum_{i=1}^{n}y_i -nln(\gamma(\alpha))$$
+b) **[4 marks]** Construct a function called `CreateLogLikeFunction` that takes in a population or vector of observed values, and outputs a function of $\boldsymbol\theta=(\alpha,\beta)$ that calculates the log-likelihood function given $(\alpha,\beta)$ as input. Apply `CreateLogLikeFunction` on the variable `commute` form the economic mobility data and calculate the resulting function at $(\alpha,\beta) = (2,2)$. The function `gamma` calculates the gamma function in `R`.
+
+```{r}
+CreateLogLikeFunction <- function(theta, data){
+  alpha <- theta[1]
+  beta <- theta[2]
+  n <- length(data)
+  logl <- n*alpha*log(beta)+(alpha-1)*sum(log(data))-beta*log(data)-n*log(gamma(alpha))
+  return(logl)
+}
+
+theta <- c(2,2)
+commute_log <- CreateLogLikeFunction(theta, econ_mob_data$Commute)
+
+```
+c) **[3 marks]** Generate the 3D plot of the log-likelihood function in part (b) over the range $\alpha\in(0,100)$ and $\beta\in(0,100)$, as well as its heat map with the contour plot superimposed on the heat map. You may find the functions `outer`, `persp`, `image`, and `contour` useful for this task, but you do not have to use them.
+
+
+
+d) **[5 marks]** Write a function which uses the gradient descent (or gradient ascent) with a line-search over the range $\lambda=0,0.01,0.02,...,5$ to find the maximum likelihood estimates of parameters $\alpha$ and $\beta$ given the variable `commute`. The function `digamma` in `R` calculates $\frac{d}{dx}\log(\Gamma(x))$.
+
+```{r}
+testConvergence <- function(newTheta, oldTheta, tolerance= 1e-10, relative = FALSE){
+  sum(abs(newTheta - oldTheta))< if (relative)
+    tolerance*sum(abs(oldTheta))
+  else tolerance
+}
+
+gridLineSearch <- function(theta, rhoFun, gradFun, lambdaStepSize = 0.01, lambdaMax = 1){
+  lambdas <- seq(from = 0, by = lambdaStepSize, to = lambdaMax)
+  
+  ## line search
+}
+
+rhoFun <- function(theta){
+  
+}
+
+gradFun <- function(theta){
+  
+}
+
+gradientDescent <- function(rhoFun, gradFun, theta, lineSearchFun, testConvergenceFun, lambdaStepSize, lambdaMax, maxIterations){
+  iter = 0
+  converged <- FALSE
+  while(!converged & iter <= maxIterations){
+    # Calculate Gradient
+    gradient <- gradFun(theta)
+    # Calculate Gradient Direction
+    glength <- sqrt(sum(gradient^2))
+    if (glength > 0)
+      gradient <- gradient/glength
+    
+    lambda <- lineSearchFun(theta, rhoFun, g, lambdaStepSize = lambdaStepSize, lambdaMax = lambdaMax)
+    
+    new_theta <- theta - lambda*g
+    converged <- testConvergenceFun(new_theta, theta, tolerance = tolerance, relative = relative)
+    theta <- thetaNew
+    iter <- iter + 1
+  }
+  
+  list(theta = theta, converged=converged, iteration = iter, rhoVal = rhoFun(theta))
+}
+```
+

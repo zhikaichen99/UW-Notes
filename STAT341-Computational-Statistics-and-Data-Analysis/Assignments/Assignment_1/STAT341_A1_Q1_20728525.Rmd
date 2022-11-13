@@ -1,0 +1,96 @@
+---
+title: "STAT341 Assignment 1"
+author: "Zhi Kai Chen"
+date: "1/28/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1 [24 marks]
+
+$$\alpha(\mathcal{P}) = \frac{\frac{1}{N} \sum_{u \in \mathcal{P}}\left( y_u -\overline{y} \right)^4}{ \sigma^4 }-3 $$
+Where:
+
+$$\overline{y} = \frac{1}{N}\sum_{u \in \mathcal{P}}y_u$$  
+$$\sigma^4 = [\frac{1}{N}\sum_{u \in \mathcal{P}}(y_u-\overline y)^2]^2$$
+
+(a) **[3 marks]** Investigate if $\alpha(\mathcal P)$ is location invariant, location equivariant, or neither.
+
+$$\alpha(\mathcal{P} + b) = \frac{\frac{1}{N} \sum_{u \in \mathcal{P}}\left( (y_u + \cancel{b}) -(\overline{y} + \cancel{b}) \right)^4}{[\frac{1}{N}\sum_{u \in \mathcal{P}}((y_u + \cancel{b})-(\overline y + \cancel{b})^2]^2}-3 $$
+$$\alpha(\mathcal{P} + b) = \frac{\frac{1}{N} \sum_{u \in \mathcal{P}}\left( y_u -\overline{y}) \right)^4}{[\frac{1}{N}\sum_{u \in \mathcal{P}}(y_u-\overline y)^2]^2}-3 $$
+$$\alpha(\mathcal{P} + b) = \alpha(\mathcal{P}) $$
+\center{Location Invariant}
+
+(b) **[3 marks]** Investigate if $\alpha(\mathcal P)$ is scale invariant, scale equivariant, or neither.
+
+$$\alpha(m\mathcal{P}) = \frac{\frac{1}{N} \sum_{u \in \mathcal{P}}\left( my_u -m\overline{y}) \right)^4}{[\frac{1}{N}\sum_{u \in \mathcal{P}}(my_u-m\overline y)^2]^2}-3 $$
+$$\alpha(m\mathcal{P}) = \frac{\frac{\cancel{m^4}}{N} \sum_{u \in \mathcal{P}}\left( y_u -\overline{y}) \right)^4}{\cancel{m^4}[\frac{1}{N}\sum_{u \in \mathcal{P}}(y_u-\overline y)^2]^2}-3 $$
+$$\alpha(m\mathcal{P}) = \alpha(\mathcal{P}) $$
+\center{Scale Invariant}
+
+(c) **[3 marks]** Investigate if $\alpha(\mathcal P)$ is location-scale invariant, location-scale equivariant, or neither.
+
+$$\alpha(m\mathcal{P} + b) = \frac{\frac{1}{N} \sum_{u \in \mathcal{P}}\left( (my_u + \cancel{b}) -(m\overline{y} + \cancel{b}) \right)^4}{[\frac{1}{N}\sum_{u \in \mathcal{P}}((my_u + \cancel{b})-(m\overline y + \cancel{b})^2]^2}-3 $$
+$$\alpha(m\mathcal{P} + b) = \frac{\frac{\cancel{m^4}}{N} \sum_{u \in \mathcal{P}}\left( y_u -\overline{y}) \right)^4}{\cancel{m^4}[\frac{1}{N}\sum_{u \in \mathcal{P}}(y_u-\overline y)^2]^2}-3 $$
+$$\alpha(m\mathcal{P}+b) = \alpha(\mathcal{P}) $$
+\center{Location Scale Invariant}
+
+(d) **[3 marks]** Investigate if $\alpha(\mathcal P)$ is replication invariant, replication equivariant, or neither.
+
+$$\alpha(\mathcal{P}^k) = \frac{\frac{1}{N} \sum_{u \in \mathcal{P}}\left( y_u^k -\overline{y^k} \right)^4}{[\frac{1}{N}\sum_{u \in \mathcal{P}}(y_u^k-{\overline{y^k}})^2]^2}-3 $$
+\center{There is no way to factor out the k}
+$$\alpha(\mathcal{P}^k) != \alpha(\mathcal{P}) !=  k\alpha(\mathcal{P})$$
+\center{Neither replication invariant or replication equivarient}
+
+
+(e) **[3 marks]** If we replace $\sigma^4$ with $\sigma_*^4 = [\frac{1}{N-1}\sum_{u \in \mathcal{P}}(y_u-\overline y)^2]^2$ in the definition of $\alpha(\mathcal P)$, does your answer to parts (b) and (d) change? Provide the details of your response.
+
+$$\alpha(m\mathcal{P}) = \frac{\frac{1}{N} \sum_{u \in \mathcal{P}}\left( my_u -m\overline{y}) \right)^4}{[\frac{1}{N-1}\sum_{u \in \mathcal{P}}(my_u-m\overline y)^2]^2}-3 $$
+$$\alpha(m\mathcal{P}) = \frac{\frac{\cancel{m^4}}{N} \sum_{u \in \mathcal{P}}\left( y_u -\overline{y}) \right)^4}{\cancel{m^4}[\frac{1}{N-1}\sum_{u \in \mathcal{P}}(y_u-\overline y)^2]^2}-3 $$
+$$\alpha(m\mathcal{P}) = \alpha(\mathcal{P}) $$
+\center{part b) remains scale invariant}
+
+\center{part d) remains neither. There is no way to factor out the k for the skewness attribute.}
+
+(f) **[2 mark]** Write the equation for the sensitivity curve of $\alpha(\mathcal P)$, given a population $\left\{y_1, y_2, \dots, y_{N-1} \right\}$. 
+
+$\mathcal P = \left\{y_1, y_2, \dots, y_{N-1} \right\}$
+$\mathcal P^* = \left\{y_1, y_2, \dots, y_{N-1}, y \right\}$
+
+$SC(y: \alpha(\mathcal P)) = N(\alpha(\mathcal P^*) - \alpha(\mathcal P))$
+
+$$SC(y: \alpha(\mathcal P)) = N[[\frac{\frac{1}{N} \sum_{u \in \mathcal{P}^*}\left( y_u -\overline{y}^* \right)^4}{[\frac{1}{N}\sum_{u \in \mathcal{P}^*}(y_u-\overline y^*)^2]^2}-3] - [\frac{\frac{1}{N-1} \sum_{u \in \mathcal{P}}\left( y_u -\overline{y} \right)^4}{[\frac{1}{N-1}\sum_{u \in \mathcal{P}^*}(y_u-\overline y)^2]^2}-3]]$$
+$$SC(y: \alpha(\mathcal P)) = N[\frac{\frac{1}{N} \sum_{u \in \mathcal{P}^*}\left( y_u -\overline{y}^* \right)^4}{[\frac{1}{N}\sum_{u \in \mathcal{P}^*}(y_u-\overline y^*)^2]^2} - \frac{\frac{1}{N-1} \sum_{u \in \mathcal{P}}\left( y_u -\overline{y} \right)^4}{[\frac{1}{N-1}\sum_{u \in \mathcal{P}^*}(y_u-\overline y)^2]^2}]$$
+\center{where:}
+
+$$\overline y^* = \frac{1}{N} \sum_{u \in \mathcal{P}^*}y_u $$
+$$\overline y = \frac{1}{N-1} \sum_{u \in \mathcal{P}}y_u $$
+
+
+(g) **[3 marks]** For the population below, plot the sensitivity curve from part (f) for $y \in [-10,10]$. Make sure that you make the axes presentable, and include informative labels and titles. Based on this plot and all you have learned about the excess kurtosis in Question 1 so far, mention one good and one bad property of the excess kurtosis attribute.
+
+```{r}
+set.seed(341)
+pop <- rt(1000,10) # t distribution with df = 10
+y <- seq(-10, 10, length.out =  1000)
+excess_kurtosis <- function(pop){
+  (1/length(pop))*sum((pop - mean(pop))^4)/((1/length(pop))*sum((pop - mean(pop))^2)^2)
+}
+
+sensitivity = function(population, y, attribute){
+  N <- length(population) + 1
+  sapply(y, function(population.new){
+    N*(attribute(c(population.new, population)) - attribute(population))
+  })
+}
+plot(y, sensitivity(pop, y, excess_kurtosis), type = "l", lwd = 2, main = "Sensitivity Curve for Excess Kurtosis", ylab = "Sensitivity")
+```
+
+Good: Not affected by linear transformation of population
+Bad: Easily affected by single variate y in the population attribute
+
+(h) **[4 marks]** Suppose $\gamma(\mathcal P)$ is a measure of dispersion/variation with the same units as the original data (standard deviation and inter-quartile range are some examples). Consider location, scale, and location-scale invariance/equivariance properties. Explain why each of these properties are desirable or undesirable for a measure of dispersion. 

@@ -1,0 +1,102 @@
+---
+title: "STAT341_A2"
+author: "Zhi Kai Chen"
+date: "2/18/2022"
+header-includes: \usepackage[makeroom]{cancel}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+
+```
+#### Question One - 15 Marks
+
+```{r}
+econ_mob_data <- read_csv("EconomicMobility.csv")
+```
+
+a) **[4 marks]** Construct a 2X1 figure containing two scatter-plots. The first plot is latitude (y) vs longitude (x) in which the points are shaded/coloured by population categories below.
+
+
+```{r}
+
+# Create new columns for population and commuting colour. Set Black as default Colour for both
+econ_mob_data$Population_Colour="black"
+econ_mob_data$Commute_Colour= "black"
+
+# Colour population and commute based on conditions
+
+# Conditions for population
+econ_mob_data$Population_Colour[econ_mob_data$Population <= 100000]="blue"
+econ_mob_data$Population_Colour[econ_mob_data$Population > 100000 & econ_mob_data$Population < 500000]="red"
+econ_mob_data$Population_Colour[econ_mob_data$Population > 500000 & econ_mob_data$Population < 5000000]="green"
+econ_mob_data$Population_Colour[econ_mob_data$Population >= 5000000]="black"
+
+# Conditions for commute
+econ_mob_data$Commute_Colour[econ_mob_data$Commute <= 0.25]="blue"
+econ_mob_data$Commute_Colour[econ_mob_data$Commute > 0.25 & econ_mob_data$Commute < 0.5]="red"
+econ_mob_data$Commute_Colour[econ_mob_data$Commute > 0.5 & econ_mob_data$Commute < 0.75]="green"
+econ_mob_data$Commute_Colour[econ_mob_data$Commute >= 0.75]="black"
+
+
+par(mfrow = c(1,2))
+# Scatter Plot coloured by Population Categories
+plot(Latitude~Longitude, data = econ_mob_data, main = "Population Category", font.main=1, 
+     col = econ_mob_data$Population_Colour)
+# Scatter Plot coloured by Commuting Category
+plot(Latitude~Longitude, data = econ_mob_data, main = "Commute Category", font.main=1, 
+     col = econ_mob_data$Commute_Colour)
+```
+
+For the Population Category ScatterPlot it seems that there are identifiable clusters. For example you can see that there is a large cluster of blue which means that low population communties are located near each other according to their longitude and latitude.
+
+For the Commute Category ScatterPlot there are also are identifiable clusters. This suggests that people living around the same area (similar longitude and latitude coordinates), commute similar amounts.
+
+There does not seem to be any relationship between population and commute. The cluster colours are not in the same locations
+
+b) **[3 marks]** We are interested in the relationship between the fraction of workers with a commute of less than 15 minutes (y) and the population of the communities (x). 
+
+
+```{r}
+powerfun <- function(x,y, alpha_x, alpha_y){
+  if (alpha_x == 0)
+    x <- log(x)
+  if (alpha_y ==0)
+    y <- log(y)
+  else if (alpha_x > 0){
+    x <- x^alpha_x
+  }
+  else if(alpha_y > 0){
+    y <- y^alpha_y
+  }
+  else if(alpha_x < 0){
+    x <- -x^alpha_x
+  }
+  else if(alpha_y <0){
+    y <- -y^alpha_y
+  }
+  
+  return(list(x_transformed = x, y_transformed = y))
+}
+transformed <- powerfun(econ_mob_data$Population, econ_mob_data$Commute, -0.5, -0.5)
+
+
+par(mfrow = c(1,2))
+# Original Commute vs Population Scatterplot
+plot(Commute~Population, data= econ_mob_data, main = "Commute vs Population", font.main=1)
+# Transformed Commute vs Population Scatterplot
+plot(transformed$x_transformed, transformed$y_transformed , main = bquote(alpha == -.25 ), font.main=1, xlab = bquote(-("Population"^alpha )),
+     ylab = bquote(-("Commute"^alpha )))
+
+```
+c) **[5 marks]** Using power-transformations, we would like to straighten the scatterplot in part (b). Suppose the strength of the linear relationship between two variables $X$ and $Y$ is measured by the attribute $L=1-\rho_{_{XY}}^2$ in which $\rho_{_{XY}}$ is the correlation coefficient between the two variables. Assuming $x=population$ and $y=commute$, find the power-transformed data $(T_{\alpha_x}(x),T_{\alpha_y}(y))$ which have the strongest linear relationship measured by $L$. For full marks, you should:
+
+    + Create a function $L$ in `R` which takes in $\theta=(\alpha_x,\alpha_y)$ as input and outputs $1-corr^2\left(T_{\alpha_x}(x) , T_{\alpha_y}(y)\right)$.
+    + Optimize the function $L$ with initial values $\alpha_x=\alpha_y=1$, and report optimum values of $\alpha_x$ and $\alpha_y$.
+    + Generate the scatterplot of the original data as well as the scatterplot of the power-transformed data, and calculate the correlation coeeficient for each scatterplot
+    
+    While you have learned the gradient descent method for optimization, it requires deriving the gradient function. The built-in function `nlminb` can use different numerical optimization methods to find the minimum of a function. Read the help document of `nlminb` carefully, and use it for to solve your optimizaiton problem in this question.

@@ -1,0 +1,210 @@
+---
+title: "STAT341-Assignment 4"
+author: "Zhi Kai Chen"
+date: '2022-03-26'
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+header-includes: \usepackage[makeroom]{cancel}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+library(readr)
+library(plotly)
+
+```
+#### Question One - 25 Marks
+
+```{r}
+econMob_data <- read_csv("EconomicMobility.csv")
+```
+
+a) **[2 Mark]** Write a function named `VarIQR` that takes in a population or sample of variates and outputs the variance $\sigma^2$ and the inter-quartile range $IQR$. Apply this function to the population of `Mobility` values.
+
+```{r}
+VarIQR <- function(y_pop){
+  n <- length(y_pop)
+  pop_iqr <- IQR(y_pop)
+  pop_var <- sum((y_pop - mean(y_pop))^2)/n
+
+  return(c(pop_var, pop_iqr))
+}
+
+VarIQR(econMob_data$Mobility)
+```
+
+
+b)  **[5 Marks]** Here, we study the sampling distribution of two the attributes.
+    - Select $M=1000$ samples of size $n=100$ without replacement from the original data-set, i.e. construct  $S_1,S_2,\ldots,S_{1000}$.
+    - For each sample calculate the variance and the IQR. Then construct two histograms (in a single row) of the sample error for each attribute.
+    
+```{r}
+sim.VarIQR <- function(pop = NULL, n = NULL, m = 1000){
+  N = length(pop);
+  set.seed(341)
+  
+  pop.variance = unlist(Map(function(rep){
+    sam.y = pop[sample(N,n, replace = FALSE)]
+    varSam = VarIQR(sam.y)[1]
+  }, 1:m))
+  
+  pop.iqr = unlist(Map(function(rep){
+    sam.y = pop[sample(N,n, replace = FALSE)]
+    iqrSam = VarIQR(sam.y)[2]
+  }, 1:m))
+  
+  return(list(pop.variance, pop.iqr))
+
+}
+
+pop.var <- (sim.VarIQR(econMob_data$Mobility, 100)[[1]]) - VarIQR(econMob_data$Mobility)[1]
+pop.iqr <- (sim.VarIQR(econMob_data$Mobility, 100)[[2]]) - VarIQR(econMob_data$Mobility)[2]
+
+par(mfrow=c(1,2), oma=c(0,0,0,0))
+hist(pop.var, breaks='FD', prob=FALSE, main="Variance Sample Error")
+hist(pop.iqr, breaks='FD', prob=FALSE, main="Inter-Quartile Range Sample Error")
+
+
+```
+
+c) The following sample $\mathcal{S}$, labelled `CommunitiesSample`, was obtained by random sampling without replacement from the population of 
+729 communities in the data-set.
+```{r} 
+CommunitiesSample = c(265, 596, 270, 334, 653, 273,  93,  58, 113, 668, 235, 243, 703, 672, 411, 231, 723, 
+                      127, 640, 217, 626, 279, 482, 395, 410, 162,   7, 603,  28, 100,  68, 141, 593, 564,
+                      557, 604, 443, 202, 480, 285, 210, 585, 199, 224, 577, 551, 464, 611, 292, 649,  80,
+                      180,   3, 463, 479,  77, 453, 241, 548, 488, 447, 396, 124, 552, 340, 615,  63, 380,
+                      599, 590, 386,  99, 374, 225, 116, 610, 215, 651,  55, 563, 562, 122, 476, 355,  36,
+                      293, 534, 652,  53, 571, 398, 353, 383, 627, 352, 377, 537, 151, 392,  51)
+```
+Using the given sample `CommunitiesSample` and the variable `Mobility`,
+
+   i) **[2 Mark]** Calculate the two attributes of interest using the given sample.
+   
+```{r}
+econ.sam <- econMob_data$Mobility[CommunitiesSample]
+
+cat("Population Variance: ", VarIQR(econ.sam)[1], "\n")
+cat("Inter-Quartile Range: ", VarIQR(econ.sam)[2], "\n")
+```
+
+   ii) **[5 Marks]** By re-sampling the sample $\mathcal{S}$ with replacement, construct $B=1000$ bootstrap samples $S_1^\star,S_2^\star,\ldots,S_{1000}^\star$ and calculate the two attributes of interest on each bootstrap sample. Then construct two histograms (in a single row) of the bootstrap sample error for each attribute. Make sure you label your histograms clearly.
+   
+```{r}
+
+sim.VarIQR <- function(pop = NULL, n = NULL, m = 1000){
+  N = length(pop);
+  set.seed(341)
+  
+  pop.variance = unlist(Map(function(rep){
+    sam.y = pop[sample(N,n, replace = TRUE)]
+    varSam = VarIQR(sam.y)[1]
+  }, 1:m))
+  
+  pop.iqr = unlist(Map(function(rep){
+    sam.y = pop[sample(N,n, replace = TRUE)]
+    iqrSam = VarIQR(sam.y)[2]
+  }, 1:m))
+  
+  return(list(pop.variance, pop.iqr))
+
+}
+
+pop.var <- (sim.VarIQR(econMob_data$Mobility, 100)[[1]]) - VarIQR(econMob_data$Mobility)[1]
+pop.iqr <- (sim.VarIQR(econMob_data$Mobility, 100)[[2]]) - VarIQR(econMob_data$Mobility)[2]
+
+par(mfrow=c(1,2), oma=c(0,0,0,0))
+hist(pop.var, breaks='FD', prob=FALSE, main="Bootstrap Variance Sample Error")
+hist(pop.iqr, breaks='FD', prob=FALSE, main="Bootstrap Inter-Quartile Range Sample Error")
+
+```
+
+
+   iii) **[5 Marks]** Calculate standard errors for each sample estimate and then construct a 95% confidence interval for the population quantity using the percentile method. 
+   
+```{r}
+sim.VarIQR <- function(pop = NULL, n = NULL, m = 1000){
+  N = length(pop);
+  set.seed(341)
+  
+  pop.variance = unlist(Map(function(rep){
+    sam.y = pop[sample(N,n, replace = TRUE)]
+    varSam = VarIQR(sam.y)[1]
+  }, 1:m))
+  
+  pop.iqr = unlist(Map(function(rep){
+    sam.y = pop[sample(N,n, replace = TRUE)]
+    iqrSam = VarIQR(sam.y)[2]
+  }, 1:m))
+  
+  return(list(pop.variance, pop.iqr))
+
+}
+
+pop.var <- (sim.VarIQR(econMob_data$Mobility, 100)[[1]]) - VarIQR(econMob_data$Mobility)[1]
+pop.iqr <- (sim.VarIQR(econMob_data$Mobility, 100)[[2]]) - VarIQR(econMob_data$Mobility)[2]
+
+s_error_var <- sd(pop.var)/sqrt(1000)
+s_error_iqr <- sd(pop.var)/sqrt(1000)
+
+cat("Standard Error of Variance: ", s_error_var, "\n")
+cat("Standard Error of Inter-Quartile Range: ", s_error_iqr, "\n")
+```
+
+
+```{r}
+total.tab = matrix(0, 2, 2)
+rownames(total.tab) = c("Percentile Interval (Variance)",
+"Percentile Interval (Inter-Quartile Range)")
+colnames(total.tab) = c("Lower", "Upper")
+# percentile interval
+total.tab[1,] <- quantile(pop.var, probs=c(0.025, 0.975))
+total.tab[2,] <- quantile(pop.iqr, probs=c(0.025, 0.975))
+total.tab
+```
+
+d) **[6 marks]** For each of the two attributes of interest estimate the coverage probability when using the percentile method and give the standard error of your estimate. For the simulation, choose an appropriate number of samples and number of bootstrap samples. In addition, provide a conclusion about the procedure.\
+**Note:** this analysis can be computationally intensive. Do not leave it until last minute.
+
+```{r}
+generateCoverageProbs <- function(pop) {
+  N = length(pop);
+  n = 50
+  var <- vector()
+  varI <- vector()
+  iqr <- vector()
+  iqrI <- vector()
+
+  for (i in 1:100) {
+    set.seed(i)
+    pop.values <- pop[sample(N, n, replace=FALSE)]
+    var.pop <- (sim.VarIQR(pop.values, 50)[[1]])
+    iqr.pop <- (sim.VarIQR(pop.values, 50)[[2]])
+    varQ <- quantile(var.pop, probs=c(0.025, 0.975))
+    iqrQ <- quantile(iqr.pop, probs=c(0.025, 0.975))
+    var[i] <- mean(var.pop)
+    iqr[i] <- mean(iqr.pop)
+    if ((VarIQR(pop)[1] < varQ[[1]]) | (VarIQR(pop)[1] > varQ[[2]])) {
+      varI[i] <- 1
+    } else {
+      varI[i] <- 0
+    }
+    if ((VarIQR(pop)[2] < iqrQ[[1]]) | (VarIQR(pop)[2] > iqrQ[[2]])) {
+      iqrI[i] <- 1
+    } else {
+      iqrI[i] <- 0
+    }
+  }
+  
+  cat("Variance Esimated Coverage: ", 1 - (sum(varI)/length(varI)), "\n")
+  cat("Variance Standard Error: : ", sd(var)/sqrt(100), "\n")
+  cat("Inter-Quartile Rnage Estimated Coverage: ", 1 - (sum(iqrI)/length(iqrI)), "\n")
+  cat("Variance Standard Error: : ", sd(iqr)/sqrt(100), "\n")
+}
+
+generateCoverageProbs(econMob_data$Mobility)
+```
